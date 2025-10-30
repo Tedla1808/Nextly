@@ -51,54 +51,88 @@ app.use('/api/notifications', notificationRoutes); // Use the router from the ex
 // --- Scheduled Hourly Job for Notifications ---
 // Runs at the top of every hour
 cron.schedule('0 * * * *', async () => {
-    console.log('Running hourly check for user notifications...');
+    console.log('Running hourly check for multi-stage user notifications...');
     const { sendNotificationToDevice } = require('./routes/notifications');
 
-    const today = new Date();
-    const todayString = today.toISOString().split('T')[0]; // YYYY-MM-DD
+    // --- Define the fixed reminder schedules ---
+    const criticalReminderDays = [15, 10, 5, 1];
+    const importantReminderDays = [7, 3, 1];
+    
+    // Helper function to get a future date in YYYY-MM-DD format
+    const getFutureDateString = (daysToAdd) => {
+        const date = new Date();
+        date.setDate(date.getDate() + daysToAdd);
+        return date.toISOString().split('T')[0];
+    };
+
+    const todayString = new Date().toISOString().split('T')[0];
 
     try {
         // 1. Find all users who have an FCM token saved
-        const usersToNotify = await User.find({ fcmToken: { $ne: null } });
+        const usersToNotify = await User.find({ fcmToken: { $ne: null, $exists: true } });
 
         if (usersToNotify.length === 0) {
             console.log('No users with registered devices to notify.');
             return;
         }
 
-        console.log(`Found ${usersToNotify.length} user(s) with registered devices.`);
-
-        // 2. Loop through each user
+        // 2. Loop through each user to send personalized notifications
         for (const user of usersToNotify) {
-            // 3. Find uncompleted tasks for THIS specific user
-            const uncompletedTasks = await Task.find({
+
+            // --- Check for Critical Tasks based on the schedule ---
+            for (const days of criticalReminderDays) {
+                const targetDate = getFutureDateString(days);
+                const tasks = await Task.find({
+                    username: user.username,
+                    date: targetDate,
+                    priority: 'critical',
+                    completed: false
+                });
+
+                if (tasks.length > 0) {
+                    const title = `Critical Task Reminder`;
+                    const body = `You have ${tasks.length} critical task(s) due in ${days} day(s).`;
+                    console.log(`Notifying ${user.username}: ${body}`);
+                    sendNotificationToDevice(user.fcmToken, { notification: { title, body } });
+                }
+            }
+
+            // --- Check for Important Tasks based on the schedule ---
+            for (const days of importantReminderDays) {
+                const targetDate = getFutureDateString(days);
+                const tasks = await Task.find({
+                    username: user.username,
+                    date: targetDate,
+                    priority: 'important',
+                    completed: false
+                });
+
+                if (tasks.length > 0) {
+                    const title = `Important Task Reminder`;
+                    const body = `You have ${tasks.length} important task(s) due in ${days} day(s).`;
+                    console.log(`Notifying ${user.username}: ${body}`);
+                    sendNotificationToDevice(user.fcmToken, { notification: { title, body } });
+                }
+            }
+
+            // --- Check for Today's Uncompleted Tasks (Daily Hourly Reminder) ---
+            const todaysTasks = await Task.find({
                 username: user.username,
                 date: todayString,
                 completed: false
             });
 
-            if (uncompletedTasks.length > 0) {
-                console.log(`Found ${uncompletedTasks.length} tasks for ${user.username}. Sending reminder.`);
-
-                // 4. Create a personalized message
-                const message = {
-                    notification: {
-                        title: 'Task Reminder from Nextly',
-                        body: `You have ${uncompletedTasks.length} uncompleted task(s) for today.`
-                    }
-                };
-
-                // 5. Send the notification to the user's specific device token
-                sendNotificationToDevice(user.fcmToken, message);
-            } else {
-                console.log(`No uncompleted tasks for ${user.username} today.`);
+            if (todaysTasks.length > 0) {
+                const title = 'Daily Task Reminder';
+                const body = `You have ${todaysTasks.length} uncompleted task(s) for today.`;
+                console.log(`Notifying ${user.username}: ${body}`);
+                sendNotificationToDevice(user.fcmToken, { notification: { title, body } });
             }
         }
     } catch (error) {
         console.error('Error during hourly notification job:', error);
     }
 });
-
 
 // Fallback: All other unhandled requests will serve the main frontend page
 app.get('*', (req, res) => {

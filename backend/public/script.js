@@ -58,8 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingsModal = document.getElementById('settings-modal');
     const closeSettingsBtn = document.getElementById('close-settings-btn');
     const enableNotificationsToggle = document.getElementById('enable-notifications');
-    const criticalTimingSelect = document.getElementById('critical-timing');
-    const importantTimingSelect = document.getElementById('important-timing');
     const hourlyReminderToggle = document.getElementById('hourly-reminder');
     const dailySummaryToggle = document.getElementById('daily-summary');
     const dailySummaryTimeContainer = document.getElementById('daily-summary-time-container');
@@ -92,8 +90,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let isLoginMode = true;
     let settings = {
         notificationsEnabled: true,
-        criticalTaskTiming: "15", // Default
-        importantTaskTiming: "7", // Default
         dailySummaryEnabled: false,
         dailySummaryTime: "08:00",
         hourlyReminderEnabled: false,
@@ -217,8 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveSettings = () => { if (currentUser) localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings)); };
     const loadSettings = () => {
         const defaultSettings = {
-            notificationsEnabled: true, criticalTaskTiming: "15", importantTaskTiming: "7",
-            dailySummaryEnabled: false, dailySummaryTime: "08:00", hourlyReminderEnabled: false,
+            notificationsEnabled: true, dailySummaryEnabled: false, dailySummaryTime: "08:00", hourlyReminderEnabled: false,
             theme: "system", accentColor: "blue", fontSize: "medium"
         };
         settings = defaultSettings;
@@ -227,8 +222,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (savedSettings) settings = { ...defaultSettings, ...savedSettings };
         }
         enableNotificationsToggle.checked = settings.notificationsEnabled;
-        criticalTimingSelect.value = settings.criticalTaskTiming;
-        importantTimingSelect.value = settings.importantTaskTiming;
         dailySummaryToggle.checked = settings.dailySummaryEnabled;
         dailySummaryTimeInput.value = settings.dailySummaryTime;
         dailySummaryTimeContainer.classList.toggle('hidden', !settings.dailySummaryEnabled);
@@ -548,8 +541,6 @@ document.addEventListener('DOMContentLoaded', () => {
     closeSettingsBtn.addEventListener('click', closeSettingsModal);
     closeAnalysisBtn.addEventListener('click', closeAnalysisModal);
     enableNotificationsToggle.addEventListener('change', (e) => { settings.notificationsEnabled = e.target.checked; saveSettings(); });
-    criticalTimingSelect.addEventListener('change', (e) => { settings.criticalTaskTiming = e.target.value; saveSettings(); });
-    importantTimingSelect.addEventListener('change', (e) => { settings.importantTaskTiming = e.target.value; saveSettings(); });
     dailySummaryToggle.addEventListener('change', (e) => { settings.dailySummaryEnabled = e.target.checked; dailySummaryTimeContainer.classList.toggle('hidden', !e.target.checked); saveSettings(); });
     dailySummaryTimeInput.addEventListener('change', (e) => { settings.dailySummaryTime = e.target.value; saveSettings(); });
     hourlyReminderToggle.addEventListener('change', (e) => { settings.hourlyReminderEnabled = e.target.checked; saveSettings(); });
