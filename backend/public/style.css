@@ -297,41 +297,27 @@ footer {
 .hidden { display: none !important; }
 
 /* =============================================== */
-/* ============== Mobile Responsive ============== */
+/* =========== Robust Modal Sizing =============== */
 /* =============================================== */
 
-/* Apply these styles ONLY on screens 600px or less */
+/* This rule applies to large modals on ALL screen sizes */
+.modal-content.modal-lg {
+    /* Use 95% of the viewport width, but never get wider than 500px. */
+    width: 95vw; 
+    max-width: 500px;
+    
+    /* Make padding smaller on narrow screens using a modern clamp function */
+    padding: clamp(15px, 5vw, 25px);
+}
+
+/* These rules are for small screens, so they still need a media query */
 @media (max-width: 600px) {
-
-    /* Make the large modals take up more screen width */
-    .modal-content.modal-lg {
-        max-width: none; /* Remove the 500px limit */
-        width: 95%;      /* Use 95% of the screen width */
-        padding: 15px;   /* Reduce padding on small screens */
-    }
-
-    /* Reduce header font size inside modals */
-    .modal-content h2 {
-        font-size: calc(var(--base-font-size) * 1.3);
-    }
-    .modal-content h3 {
-        font-size: calc(var(--base-font-size) * 1.1);
-    }
-
-    /* Make the segmented controls stack vertically for better touch targets */
     .setting-item {
         flex-direction: column;
         align-items: flex-start;
-        gap: 8px; /* Add some space between the label and the control */
+        gap: 8px;
     }
-    
     .segmented-control, .color-swatch-container {
         width: 100%;
-        display: flex;
-        justify-content: space-around;
-    }
-    
-    .segmented-control button {
-        flex-grow: 1; /* Make buttons share space equally */
     }
 }
