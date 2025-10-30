@@ -105,6 +105,59 @@ header { background-color: var(--header-bg); padding: 15px 20px; display: flex; 
 .contact-info p { margin-bottom: 5px; font-weight: bold; }
 .contact-info a { color: var(--primary-color); text-decoration: none; }
 
+/* --- User Section --- */
+.user-section {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+#login-view {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+#auth-title {
+    text-align: center;
+    margin-bottom: 5px;
+    font-size: calc(var(--base-font-size) * 1.2);
+}
+#username-input, #password-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-size: var(--base-font-size);
+}
+#auth-btn, #logout-btn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    background-color: var(--primary-color);
+    color: white;
+    font-size: var(--base-font-size);
+}
+#auth-toggle-link {
+    font-size: calc(var(--base-font-size) * 0.8);
+    text-align: center;
+    color: var(--primary-color);
+    text-decoration: none;
+    margin-top: 5px;
+}
+#logout-btn {
+    background-color: var(--danger-color);
+    margin-top: 10px;
+}
+#profile-view {
+    text-align: center;
+}
+.welcome-message {
+    font-size: calc(var(--base-font-size) * 1.1);
+}
+
 /* --- Theme Switcher --- */
 .theme-switcher { display: flex; justify-content: space-between; align-items: center; padding: 15px; }
 .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
@@ -158,11 +211,28 @@ main { padding: 20px; flex-grow: 1; }
 .task-item.search-result .task-content { flex-grow: 1; }
 .task-date-display { font-size: calc(var(--base-font-size) * 0.8); font-weight: bold; color: var(--primary-color); background-color: var(--border-color); padding: 4px 8px; border-radius: 8px; white-space: nowrap; margin-left: 15px; }
 
-/* --- Empty State --- */
+/* --- Empty State & Logged Out View --- */
 .empty-state { text-align: center; padding: 40px 20px; color: var(--text-color); opacity: 0.7; }
 .empty-state i { font-size: 50px; margin-bottom: 15px; }
 .empty-state p { font-size: var(--base-font-size); font-weight: 500; }
 .empty-state span { font-size: calc(var(--base-font-size) * 0.9); }
+
+.logged-out-view {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 40px;
+    flex-grow: 1;
+    color: var(--text-color);
+    opacity: 0.7;
+}
+.logged-out-view i { font-size: 50px; margin-bottom: 20px; }
+.logged-out-view h2 { font-size: calc(var(--base-font-size) * 1.5); margin-bottom: 10px; }
+
+body:not(.logged-in) .requires-login { display: none !important; }
+body:not(.logged-in) #logged-out-view { display: flex; }
 
 /* --- Modals --- */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 300; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
@@ -182,7 +252,7 @@ main { padding: 20px; flex-grow: 1; }
 .jump-form { display: grid; grid-template-columns: 2fr 1fr 1.5fr; gap: 10px; align-items: center; margin-top: 15px; }
 .jump-form select, .jump-form input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--bg-color); color: var(--text-color); font-size: var(--base-font-size); }
 
-/* --- Settings Modal --- */
+/* --- Settings & Analysis Modals --- */
 .modal-content.modal-lg { max-width: 500px; }
 .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .close-modal-btn { background: none; border: none; font-size: 28px; line-height: 1; cursor: pointer; color: var(--text-color); }
@@ -206,7 +276,7 @@ main { padding: 20px; flex-grow: 1; }
 .danger-btn:disabled { background-color: #ccc; cursor: not-allowed; }
 #delete-confirm-input { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--bg-color); color: var(--text-color); font-size: 16px; text-align: center; }
 
-/* --- Analysis Modal Styles --- */
+/* --- Analysis Modal --- */
 .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px; }
 .stat-card { background-color: var(--bg-color); padding: 15px; border-radius: 12px; text-align: center; border: 1px solid var(--border-color); }
 .stat-number { display: block; font-size: calc(var(--base-font-size) * 1.8); font-weight: 700; color: var(--primary-color); }
@@ -226,150 +296,11 @@ footer {
 /* --- Utility --- */
 .hidden { display: none !important; }
 
-/* --- All existing styles are the same, except for the Side Menu section --- */
-/* ... */
+/* =============================================== */
+/* ============== Mobile Responsive ============== */
+/* =============================================== */
 
-/* --- Side Menu --- */
-.side-menu { /* ... (existing styles) */ }
-.menu-header { /* ... (existing styles) */ }
-
-/* NEW: User Section Styles */
-.user-section {
-    padding: 15px 20px;
-    border-bottom: 1px solid var(--border-color);
-}
-#login-view {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-#username-input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    font-size: var(--base-font-size);
-}
-#login-btn, #logout-btn {
-    width: 100%;
-    padding: 10px;
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    background-color: var(--primary-color);
-    color: white;
-    font-size: var(--base-font-size);
-}
-#logout-btn {
-    background-color: var(--danger-color);
-    margin-top: 10px;
-}
-#profile-view {
-    text-align: center;
-}
-.welcome-message {
-    font-size: calc(var(--base-font-size) * 1.1);
-}
-
-
-.menu-content { /* ... (existing styles) */ }
-
-/* --- All existing styles are the same, except for the User Section --- */
-/* ... */
-
-/* --- Side Menu Content --- */
-/* ... */
-.user-section {
-    padding: 15px 20px;
-    border-bottom: 1px solid var(--border-color);
-}
-#login-view {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-#auth-title {
-    text-align: center;
-    margin-bottom: 5px;
-    font-size: calc(var(--base-font-size) * 1.2);
-}
-#username-input, #password-input { /* Added password input */
-    width: 100%;
-    padding: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    font-size: var(--base-font-size);
-}
-#auth-btn, #logout-btn {
-    width: 100%;
-    padding: 10px;
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    background-color: var(--primary-color);
-    color: white;
-    font-size: var(--base-font-size);
-}
-#auth-toggle-link {
-    font-size: calc(var(--base-font-size) * 0.8);
-    text-align: center;
-    color: var(--primary-color);
-    text-decoration: none;
-    margin-top: 5px;
-}
-#logout-btn {
-    background-color: var(--danger-color);
-    margin-top: 10px;
-}
-#profile-view {
-    text-align: center;
-}
-.welcome-message {
-    font-size: calc(var(--base-font-size) * 1.1);
-}
-
-/* --- All existing styles are the same, except for these additions --- */
-/* ... */
-
-/* --- Main Content Area --- */
-main { padding: 20px; flex-grow: 1; }
-/* ... (rest of main content styles) */
-
-/* NEW: Styles for the logged-out message */
-.logged-out-view {
-    display: none; /* Hidden by default */
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 40px;
-    flex-grow: 1;
-    color: var(--text-color);
-    opacity: 0.7;
-}
-.logged-out-view i {
-    font-size: 50px;
-    margin-bottom: 20px;
-}
-.logged-out-view h2 {
-    font-size: calc(var(--base-font-size) * 1.5);
-    margin-bottom: 10px;
-}
-
-/* NEW: Powerful rule to control UI based on login state */
-body:not(.logged-in) .requires-login {
-    display: none !important; /* Hide elements that need a user */
-}
-body:not(.logged-in) #logged-out-view {
-    display: flex; /* Show the login prompt */
-}
-
+/* Apply these styles ONLY on screens 600px or less */
 @media (max-width: 600px) {
 
     /* Make the large modals take up more screen width */
