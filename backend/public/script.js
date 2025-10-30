@@ -210,6 +210,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadMotto = () => { mottoInput.value = currentUser ? localStorage.getItem(`userMotto_${currentUser}`) || "Your daily focus motto" : "Your daily focus motto"; };
 
     // --- Settings Functions ---
+    const saveSettingsToServer = async () => {
+    if (!currentUser) return; // Don't save if no user is logged in
+    
+    // We only need to send the relevant settings
+    const settingsPayload = {
+        notificationsEnabled: settings.notificationsEnabled,
+        hourlyReminderEnabled: settings.hourlyReminderEnabled,
+        dailySummaryEnabled: settings.dailySummaryEnabled,
+        dailySummaryTime: settings.dailySummaryTime
+    };
+
+    try {
+        await fetch(`/api/user/${currentUser}/settings`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(settingsPayload)
+        });
+        console.log("Settings saved to server.");
+    } catch (error) {
+        console.error("Failed to save settings to server:", error);
+    }
+};
     const saveSettings = () => { if (currentUser) localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings)); };
     const loadSettings = () => {
         const defaultSettings = {
@@ -540,10 +562,34 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     closeSettingsBtn.addEventListener('click', closeSettingsModal);
     closeAnalysisBtn.addEventListener('click', closeAnalysisModal);
-    enableNotificationsToggle.addEventListener('change', (e) => { settings.notificationsEnabled = e.target.checked; saveSettings(); });
-    dailySummaryToggle.addEventListener('change', (e) => { settings.dailySummaryEnabled = e.target.checked; dailySummaryTimeContainer.classList.toggle('hidden', !e.target.checked); saveSettings(); });
-    dailySummaryTimeInput.addEventListener('change', (e) => { settings.dailySummaryTime = e.target.value; saveSettings(); });
-    hourlyReminderToggle.addEventListener('change', (e) => { settings.hourlyReminderEnabled = e.target.checked; saveSettings(); });
+    
+    enableNotificationsToggle.addEventListener('change', (e) => {
+    settings.notificationsEnabled = e.target.checked;
+    saveSettings(); // Saves to localStorage
+    saveSettingsToServer(); // *** ADD THIS ***
+    });
+
+// critical and important timing selects are removed, so their listeners should be gone.
+
+dailySummaryToggle.addEventListener('change', (e) => {
+    settings.dailySummaryEnabled = e.target.checked;
+    dailySummaryTimeContainer.classList.toggle('hidden', !e.target.checked);
+    saveSettings();
+    saveSettingsToServer(); // *** ADD THIS ***
+});
+
+dailySummaryTimeInput.addEventListener('change', (e) => {
+    settings.dailySummaryTime = e.target.value;
+    saveSettings();
+    saveSettingsToServer(); // *** ADD THIS ***
+});
+
+hourlyReminderToggle.addEventListener('change', (e) => {
+    settings.hourlyReminderEnabled = e.target.checked;
+    saveSettings();
+    saveSettingsToServer(); // *** ADD THIS ***
+});
+
     themeSelector.addEventListener('click', (e) => {
         if (e.target.tagName === 'BUTTON') {
             themeSelector.querySelector('.active').classList.remove('active');
