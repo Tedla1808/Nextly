@@ -314,6 +314,9 @@ footer {
     
     /* Make padding smaller on narrow screens using a modern clamp function */
     padding: clamp(15px, 5vw, 25px);
+
+    max-height: 90vh; /* Don't let the modal be taller than 90% of the screen's height */
+    overflow-y: auto;  /* Add a vertical scrollbar ONLY if the content inside is too tall */
 }
 
 /* These rules are for small screens, so they still need a media query */
