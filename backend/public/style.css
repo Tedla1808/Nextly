@@ -1,6 +1,12 @@
 /* --- Import Google Font for the Title --- */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap');
 
+/* --- ADD THIS BLOCK --- */
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
 /* --- General & Theme Variables --- */
 :root {
     --bg-color: #f4f7fc;
