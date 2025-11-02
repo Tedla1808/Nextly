@@ -14,11 +14,14 @@ const userSchema = new mongoose.Schema({
     },
     fcmToken: { type: String },
 
+    // The 'settings' object now correctly contains all its fields.
     settings: {
         notificationsEnabled: { type: Boolean, default: true },
         hourlyReminderEnabled: { type: Boolean, default: false },
         dailySummaryEnabled: { type: Boolean, default: false },
-        dailySummaryTime: { type: String, default: '08:00' }
+        dailySummaryTime: { type: String, default: '08:00' }, 
+        timezone: { type: String, default: 'UTC' },
+        lastAdvancedReminderDate: { type: String, default: null }             
     }
 });
 

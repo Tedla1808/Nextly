@@ -123,27 +123,29 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const login = (username) => {
-        if (!username) return;
-        currentUser = username;
-        localStorage.setItem('nextlyUser', currentUser);
-        
-        // Update UI
-        body.classList.add('logged-in'); 
-        currentUserDisplay.textContent = currentUser;
-        loginView.classList.add('hidden');
-        profileView.classList.remove('hidden');
+    if (!username) return;
+    currentUser = username;
+    localStorage.setItem('nextlyUser', currentUser);
+    
+    body.classList.add('logged-in'); 
+    currentUserDisplay.textContent = currentUser;
+    loginView.classList.add('hidden');
+    profileView.classList.remove('hidden');
 
-        // *** UPDATE THIS CODE TO SEND THE USERNAME ***
     if (typeof Android !== "undefined" && Android.registerFCMToken) {
-        // Pass the current user's name to the native function
         Android.registerFCMToken(currentUser);
     }
-    // ********************************************
+    
+    loadAllUserData(); // This loads settings from localStorage
+    
+    // --- ADD THIS LINE ---
+    // After loading local settings, immediately save them to the server
+    // to ensure the timezone is registered on the backend.
+    saveSettingsToServer();
+    // ---------------------
 
-
-        loadAllUserData();
-        closeMenu();
-    };
+    closeMenu();
+};
 
     const logout = () => {
         currentUser = null;
@@ -211,14 +213,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Settings Functions ---
     const saveSettingsToServer = async () => {
-    if (!currentUser) return; // Don't save if no user is logged in
-    
-    // We only need to send the relevant settings
+    if (!currentUser) return;
+
+    // Automatically detect the browser's timezone.
+    // This will be a string like "America/New_York" or "Africa/Addis_Ababa".
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
     const settingsPayload = {
         notificationsEnabled: settings.notificationsEnabled,
         hourlyReminderEnabled: settings.hourlyReminderEnabled,
         dailySummaryEnabled: settings.dailySummaryEnabled,
-        dailySummaryTime: settings.dailySummaryTime
+        dailySummaryTime: settings.dailySummaryTime,
+        timezone: timezone // Include the detected timezone in the payload
     };
 
     try {
@@ -227,7 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(settingsPayload)
         });
-        console.log("Settings saved to server.");
+        console.log("Settings including timezone saved to server.");
     } catch (error) {
         console.error("Failed to save settings to server:", error);
     }

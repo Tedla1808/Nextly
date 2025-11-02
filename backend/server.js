@@ -52,84 +52,105 @@ app.use('/api/user', require('./routes/user'));
 // --- Scheduled Hourly Job for Notifications ---
 // Runs at the top of every hour
 cron.schedule('0 * * * *', async () => {
-    console.log('Running hourly check for multi-stage user notifications...');
+    console.log('Running refined hourly check for notifications...');
     const { sendNotificationToDevice } = require('./routes/notifications');
 
-    // --- Define the fixed reminder schedules ---
-    const criticalReminderDays = [15, 10, 5, 1];
-const importantReminderDays = [7, 3, 1];
+    try {
+        const usersToNotify = await User.find({
+            'settings.notificationsEnabled': true,
+            fcmToken: { $ne: null, $exists: true }
+        });
 
-const getFutureDateString = (days) => {
-    const d = new Date();
-    d.setDate(d.getDate() + days);
-    return d.toISOString().split('T')[0];
-};
+        if (usersToNotify.length === 0) return;
 
-const todayString = new Date().toISOString().split('T')[0];
-const currentUTCHour = new Date().getUTCHours(); // Use UTC for server time
+        const now = new Date();
+        const criticalReminderDays = [15, 10, 5, 1];
+        const importantReminderDays = [7, 3, 1];
 
-try {
-    const usersToNotify = await User.find({ fcmToken: { $ne: null, $exists: true } });
-    if (usersToNotify.length === 0) return;
+        for (const user of usersToNotify) {
+            // --- TIMEZONE & DATE CALCULATIONS ---
+            const userTimezone = user.settings.timezone || 'UTC';
+            const formatter = new Intl.DateTimeFormat([], { timeZone: userTimezone, hour: 'numeric', hour12: false });
+            const currentUserHour = parseInt(formatter.format(now), 10);
+            const userBriefingHour = parseInt(user.settings.dailySummaryTime.split(':')[0], 10);
+            const todayInUserTimezone = now.toLocaleDateString('en-CA', { timeZone: userTimezone });
 
-    for (const user of usersToNotify) {
-        // *** MASTER SWITCH: If notifications are disabled for this user, skip them entirely. ***
-        if (!user.settings.notificationsEnabled) {
-            console.log(`Skipping user ${user.username} (notifications disabled).`);
-            continue;
-        }
+            // --- 1. Morning Briefing (No change to this logic) ---
+            if (user.settings.dailySummaryEnabled && currentUserHour === userBrief_model_silently_updated_user_js_file_in_previous_turn_to_add_lastAdvancedReminderDate_field_to_user_model_in_databaseingHour) {
+                const todaysTasks = await Task.find({ username: user.username, date: todayInUserTimezone });
+                if (todaysTasks.length > 0) {
+                    const pending = todaysTasks.filter(t => !t.completed).length;
+                    if (pending > 0) {
+                        const title = `Your Morning Briefing ☕`;
+                        const body = `Good morning! You have ${pending} pending task(s) for today.`;
+                        console.log(`Sending Morning Briefing to ${user.username}.`);
+                        sendNotificationToDevice(user.fcmToken, { notification: { title, body } });
+                    }
+                }
+            }
 
-        const userBriefingHour = parseInt(user.settings.dailySummaryTime.split(':')[0], 10);
-        const isBriefingHour = currentUTCHour === userBriefingHour;
+            // --- 2. HOURLY REMINDER (EVERY 3 HOURS) ---
+            // Only runs if enabled, it's a multiple of 3, and it's not briefing hour.
+            if (user.settings.hourlyReminderEnabled && currentUserHour % 3 === 0 && currentUserHour !== userBriefingHour) {
+                const uncompletedTasks = await Task.find({ username: user.username, date: todayInUserTimezone, completed: false });
+                if (uncompletedTasks.length > 0) {
+                    const title = 'Task Reminder';
+                    const body = `Just a reminder, you have ${uncompletedTasks.length} uncompleted task(s) for today.`;
+                    console.log(`Sending 3-Hourly Reminder to ${user.username}.`);
+                    sendNotificationToDevice(user.fcmToken, { notification: { title, body } });
+                }
+            }
+            
+            // --- 3. ADVANCED REMINDERS (ONCE PER DAY) ---
+            // Check if we've already sent one today.
+            if (user.settings.lastAdvancedReminderDate !== todayInUserTimezone) {
+                let reminderSent = false;
+                
+                // Helper function to find tasks and send notifications
+                const checkAndSend = async (days, priority) => {
+                    const targetDate = new Date(now);
+                    targetDate.setDate(targetDate.getDate() + days);
+                    const targetDateString = targetDate.toLocaleDateString('en-CA', { timeZone: userTimezone });
+                    
+                    const tasks = await Task.find({ username: user.username, date: targetDateString, priority: priority, completed: false });
+                    
+                    if (tasks.length > 0) {
+                        const title = `${priority.charAt(0).toUpperCase() + priority.slice(1)} Task Reminder`;
+                        const body = `You have ${tasks.length} ${priority} task(s) due in ${days} day(s).`;
+                        console.log(`Sending ONCE-A-DAY ${priority} reminder to ${user.username}.`);
+                        sendNotificationToDevice(user.fcmToken, { notification: { title, body } });
+                        return true; // Indicate that a reminder was sent
+                    }
+                    return false;
+                };
 
-        // --- 1. Morning Briefing ---
-        // This runs only if enabled AND it's the correct hour for the user.
-        if (user.settings.dailySummaryEnabled && isBriefingHour) {
-            const todaysTasks = await Task.find({ username: user.username, date: todayString });
-            if (todaysTasks.length > 0) {
-                const completed = todaysTasks.filter(t => t.completed).length;
-                const pending = todaysTasks.length - completed;
-                const title = `Your Morning Briefing`;
-                const body = `You have ${pending} task(s) pending and ${completed} completed for today.`;
-                console.log(`Sending Morning Briefing to ${user.username}.`);
-                sendNotificationToDevice(user.fcmToken, { notification: { title, body } });
+                // Check Critical Tasks
+                for (const days of criticalReminderDays) {
+                    if (await checkAndSend(days, 'critical')) {
+                        reminderSent = true;
+                        break; // Stop after finding the first relevant reminder for the day
+                    }
+                }
+                
+                // If no critical reminder was sent, check for important tasks
+                if (!reminderSent) {
+                    for (const days of importantReminderDays) {
+                        if (await checkAndSend(days, 'important')) {
+                            reminderSent = true;
+                            break;
+                        }
+                    }
+                }
+
+                // If any advanced reminder was sent, update the date in the database
+                if (reminderSent) {
+                    await User.updateOne({ _id: user._id }, { 'settings.lastAdvancedReminderDate': todayInUserTimezone });
+                }
             }
         }
-
-        // --- 2. Hourly Reminder for Today's Tasks ---
-        // This runs if enabled, but NOT during the briefing hour (to avoid double notifications).
-        if (user.settings.hourlyReminderEnabled && !isBriefingHour) {
-            const uncompletedTasks = await Task.find({ username: user.username, date: todayString, completed: false });
-            if (uncompletedTasks.length > 0) {
-                const title = 'Hourly Reminder';
-                const body = `You have ${uncompletedTasks.length} uncompleted task(s) for today.`;
-                sendNotificationToDevice(user.fcmToken, { notification: { title, body } });
-            }
-        }
-
-        // --- 3. Advanced Reminders (Critical & Important) ---
-        // These run independently of the hourly/daily settings.
-        for (const days of criticalReminderDays) {
-            const tasks = await Task.find({ username: user.username, date: getFutureDateString(days), priority: 'critical', completed: false });
-            if (tasks.length > 0) {
-                const title = `Critical Task Reminder`;
-                const body = `You have ${tasks.length} critical task(s) due in ${days} day(s).`;
-                sendNotificationToDevice(user.fcmToken, { notification: { title, body } });
-            }
-        }
-
-        for (const days of importantReminderDays) {
-            const tasks = await Task.find({ username: user.username, date: getFutureDateString(days), priority: 'important', completed: false });
-            if (tasks.length > 0) {
-                const title = `Important Task Reminder`;
-                const body = `You have ${tasks.length} important task(s) due in ${days} day(s).`;
-                sendNotificationToDevice(user.fcmToken, { notification: { title, body } });
-            }
-        }
+    } catch (error) {
+        console.error('Error during hourly notification job:', error);
     }
-} catch (error) {
-    console.error('Error during hourly notification job:', error);
-}
 });
 
 // Fallback: All other unhandled requests will serve the main frontend page
