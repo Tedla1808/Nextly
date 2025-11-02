@@ -65,7 +65,7 @@ cron.schedule('* * * * *', async () => { // This now runs EVERY MINUTE
         for (const user of eligibleUsers) {
             const userTimezone = user.settings.timezone || 'UTC';
 
-            // --- 1. MORNING BRIEFING ---
+            // --- 1. TIME BRIEFING ---
             if (user.settings.dailySummaryEnabled) {
                 // Get current time IN THE USER'S TIMEZONE, formatted as HH:mm
                 const currentTimeInUserTz = now.toLocaleTimeString('en-GB', { timeZone: userTimezone, hour: '2-digit', minute: '2-digit' });
@@ -77,9 +77,9 @@ cron.schedule('* * * * *', async () => { // This now runs EVERY MINUTE
                     const pending = todaysTasks.filter(t => !t.completed).length;
 
                     if (pending > 0) {
-                        const title = `Your Morning Briefing ☕`;
-                        const body = `Good morning! You have ${pending} pending task(s) for today.`;
-                        console.log(`SUCCESS: Sending Morning Briefing to ${user.username} at their local time ${currentTimeInUserTz}.`);
+                        const title = `Your Time Briefing ☕`;
+                        const body = `Good day! You have ${pending} pending task(s) for today.`;
+                        console.log(`SUCCESS: Sending Time Briefing to ${user.username} at their local time ${currentTimeInUserTz}.`);
                         sendNotificationToDevice(user.fcmToken, { notification: { title, body } });
                     }
                 }
