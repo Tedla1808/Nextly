@@ -44,34 +44,29 @@ app.use('/api/user', require('./routes/user'));
 // ==============================================================================
 // === THE DEFINITIVE, TIMEZONE-AWARE, MINUTELY CRON JOB FOR ALL NOTIFICATIONS ===
 // ==============================================================================
-cron.schedule('* * * * *', async () => { // This now runs EVERY MINUTE
-    console.log(`[${new Date().toISOString()}] Cron job running...`);
+cron.schedule('* * * * *', async () => { // Runs EVERY MINUTE
     const { sendNotificationToDevice } = require('./routes/notifications');
 
     try {
         const now = new Date();
         
-        // Find all users who have notifications globally enabled and have a device token
         const eligibleUsers = await User.find({
             'settings.notificationsEnabled': true,
             fcmToken: { $ne: null, $exists: true }
         });
 
-        if (eligibleUsers.length === 0) {
-            console.log("No users eligible for notifications.");
-            return;
-        }
+        if (eligibleUsers.length === 0) return;
 
         for (const user of eligibleUsers) {
             const userTimezone = user.settings.timezone || 'UTC';
-
+            const formatter = new Intl.DateTimeFormat([], { timeZone: userTimezone, hour: 'numeric', minute: 'numeric', hour12: false });
+            const [currentUserHour, currentUserMinute] = formatter.format(now).split(':').map(Number);
+            const userBriefingHour = parseInt(user.settings.dailySummaryTime.split(':')[0], 10);
+            
             // --- 1. TIME BRIEFING ---
             if (user.settings.dailySummaryEnabled) {
-                // Get current time IN THE USER'S TIMEZONE, formatted as HH:mm
-                const currentTimeInUserTz = now.toLocaleTimeString('en-GB', { timeZone: userTimezone, hour: '2-digit', minute: '2-digit' });
-                
-                // THIS IS THE KEY: We compare the user's saved time string with the current time string.
-                if (currentTimeInUserTz === user.settings.dailySummaryTime) {
+                const [briefingHour, briefingMinute] = user.settings.dailySummaryTime.split(':').map(Number);
+                if (currentUserHour === briefingHour && currentUserMinute === briefingMinute) {
                     const todayString = now.toLocaleDateString('en-CA', { timeZone: userTimezone });
                     const todaysTasks = await Task.find({ username: user.username, date: todayString });
                     const pending = todaysTasks.filter(t => !t.completed).length;
@@ -79,9 +74,24 @@ cron.schedule('* * * * *', async () => { // This now runs EVERY MINUTE
                     if (pending > 0) {
                         const title = `Your Time Briefing ☕`;
                         const body = `Good day! You have ${pending} pending task(s) for today.`;
-                        console.log(`SUCCESS: Sending Time Briefing to ${user.username} at their local time ${currentTimeInUserTz}.`);
+                        console.log(`SUCCESS: Sending Time Briefing to ${user.username}.`);
                         sendNotificationToDevice(user.fcmToken, { notification: { title, body } });
                     }
+                }
+            }
+
+            // --- 2. 3-HOURLY REMINDER ---
+            // Runs if enabled, at the top of the hour, for hours divisible by 3,
+            // and NOT during the user's briefing hour.
+            if (user.settings.hourlyReminderEnabled && currentUserMinute === 0 && currentUserHour % 3 === 0 && currentUserHour !== userBriefingHour) {
+                const todayString = now.toLocaleDateString('en-CA', { timeZone: userTimezone });
+                const uncompletedTasks = await Task.find({ username: user.username, date: todayString, completed: false });
+
+                if (uncompletedTasks.length > 0) {
+                    const title = 'Task Reminder';
+                    const body = `Just a reminder, you have ${uncompletedTasks.length} uncompleted task(s) for today.`;
+                    console.log(`SUCCESS: Sending 3-Hourly Reminder to ${user.username}.`);
+                    sendNotificationToDevice(user.fcmToken, { notification: { title, body } });
                 }
             }
         }

@@ -2,9 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Element References ---
     const menuBtn = document.getElementById('menu-btn');
     const closeMenuBtn = document.getElementById('close-menu-btn');
-    const sideMenu = document.getElementById('side-menu');
-    const mainApp = document.getElementById('main-app');
-    const themeToggle = document.getElementById('theme-toggle');
     const mottoInput = document.getElementById('motto-input');
     const taskList = document.getElementById('task-list');
     const emptyState = document.getElementById('empty-state');
@@ -12,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const openSettingsBtn = document.getElementById('open-settings-btn');
     const openAnalysisBtn = document.getElementById('open-analysis-btn');
     const searchBar = document.getElementById('search-bar');
-    const userSection = document.getElementById('user-section');
     const loginView = document.getElementById('login-view');
     const usernameInput = document.getElementById('username-input');
     const passwordInput = document.getElementById('password-input');
@@ -22,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const profileView = document.getElementById('profile-view');
     const currentUserDisplay = document.getElementById('current-user-display');
     const logoutBtn = document.getElementById('logout-btn');
-    const body = document.body; // Reference to the body element
+    const body = document.body;
 
     // Calendar References
     const monthYearHeader = document.getElementById('month-year-header');
@@ -88,15 +84,19 @@ document.addEventListener('DOMContentLoaded', () => {
     let productivityChart = null;
     let currentUser = null;
     let isLoginMode = true;
-    let settings = {
+    let settings = {}; // Start with an empty object
+
+    const defaultSettings = {
         notificationsEnabled: true,
         dailySummaryEnabled: false,
         dailySummaryTime: "08:00",
         hourlyReminderEnabled: false,
         theme: "system",
         accentColor: "blue",
-        fontSize: "medium"
+        fontSize: "medium",
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
     };
+
     // --- User & API Functions ---
     const handleAuth = async () => {
         const username = usernameInput.value.trim().toLowerCase();
@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             if (!response.ok) throw new Error(data.message || 'An error occurred.');
             if (isLoginMode) {
-                login(data.username);
+                await login(data.username);
             } else {
                 alert(data.message);
                 toggleAuthMode();
@@ -122,48 +122,44 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const login = (username) => {
-    if (!username) return;
-    currentUser = username;
-    localStorage.setItem('nextlyUser', currentUser);
-    
-    body.classList.add('logged-in'); 
-    currentUserDisplay.textContent = currentUser;
-    loginView.classList.add('hidden');
-    profileView.classList.remove('hidden');
+    const login = async (username) => {
+        if (!username) return;
+        currentUser = username;
+        localStorage.setItem('nextlyUser', currentUser);
+        
+        body.classList.add('logged-in'); 
+        currentUserDisplay.textContent = currentUser;
+        loginView.classList.add('hidden');
+        profileView.classList.remove('hidden');
 
-    if (typeof Android !== "undefined" && Android.registerFCMToken) {
-        Android.registerFCMToken(currentUser);
-    }
-    
-    loadAllUserData(); // This loads settings from localStorage
-    
-    // --- ADD THIS LINE ---
-    // After loading local settings, immediately save them to the server
-    // to ensure the timezone is registered on the backend.
-    saveSettingsToServer();
-    // ---------------------
-
-    closeMenu();
-};
+        if (typeof Android !== "undefined" && Android.registerFCMToken) {
+            Android.registerFCMToken(currentUser);
+        }
+        
+        await loadAllUserData();
+        
+        // This is now crucial to ensure timezone is sent on first login
+        await saveSettingsToServer(); 
+        
+        closeMenu();
+    };
 
     const logout = () => {
         currentUser = null;
-        localStorage.removeItem('nextlyUser');
+        localStorage.clear(); // Clear all local storage for this app
         tasks = {};
 
-        // Update UI
-        body.classList.remove('logged-in'); // <-- ADD THIS LINE
+        body.classList.remove('logged-in');
         currentUserDisplay.textContent = '';
         loginView.classList.remove('hidden');
         profileView.classList.add('hidden');
         if (!isLoginMode) toggleAuthMode();
 
-        loadAllUserData(); // This will clear and reset the view
+        loadAllUserData();
     };
 
     const loadAllUserData = async () => {
-        loadSettings();
+        await loadSettings(); // Now fetches from server
         loadMotto();
         await loadTasksForCurrentUser();
         updateUIForNewDate();
@@ -198,72 +194,73 @@ document.addEventListener('DOMContentLoaded', () => {
         usernameInput.value = '';
     };
 
-    // --- Utility Functions ---
-    const formatDate = (date) => {
-        const d = new Date(date);
-        let month = '' + (d.getMonth() + 1);
-        let day = '' + d.getDate();
-        const year = d.getFullYear();
-        if (month.length < 2) month = '0' + month;
-        if (day.length < 2) day = '0' + day;
-        return [year, month, day].join('-');
-    };
+    const formatDate = (d) => d.toISOString().split('T')[0];
     const saveMotto = () => { if (currentUser) localStorage.setItem(`userMotto_${currentUser}`, mottoInput.value); };
     const loadMotto = () => { mottoInput.value = currentUser ? localStorage.getItem(`userMotto_${currentUser}`) || "Your daily focus motto" : "Your daily focus motto"; };
 
-    // --- Settings Functions ---
+    // --- Settings Functions (REWRITTEN) ---
     const saveSettingsToServer = async () => {
-    if (!currentUser) return;
-
-    // Automatically detect the browser's timezone.
-    // This will be a string like "America/New_York" or "Africa/Addis_Ababa".
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-    const settingsPayload = {
-        notificationsEnabled: settings.notificationsEnabled,
-        hourlyReminderEnabled: settings.hourlyReminderEnabled,
-        dailySummaryEnabled: settings.dailySummaryEnabled,
-        dailySummaryTime: settings.dailySummaryTime,
-        timezone: timezone // Include the detected timezone in the payload
+        if (!currentUser) return;
+        
+        const settingsPayload = { ...settings, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone };
+    
+        try {
+            await fetch(`/api/user/${currentUser}/settings`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(settingsPayload)
+            });
+            console.log("Settings saved to server.");
+        } catch (error) {
+            console.error("Failed to save settings to server:", error);
+        }
     };
 
-    try {
-        await fetch(`/api/user/${currentUser}/settings`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(settingsPayload)
-        });
-        console.log("Settings including timezone saved to server.");
-    } catch (error) {
-        console.error("Failed to save settings to server:", error);
-    }
-};
-    const saveSettings = () => { if (currentUser) localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings)); };
-    const loadSettings = () => {
-        const defaultSettings = {
-            notificationsEnabled: true, dailySummaryEnabled: false, dailySummaryTime: "08:00", hourlyReminderEnabled: false,
-            theme: "system", accentColor: "blue", fontSize: "medium"
-        };
-        settings = defaultSettings;
+    const loadSettings = async () => {
         if (currentUser) {
-            const savedSettings = JSON.parse(localStorage.getItem(`nextlySettings_${currentUser}`));
-            if (savedSettings) settings = { ...defaultSettings, ...savedSettings };
+            try {
+                // SERVER is the source of truth
+                const response = await fetch(`/api/user/${currentUser}/settings`);
+                const serverSettings = await response.json();
+                settings = { ...defaultSettings, ...serverSettings };
+            } catch (error) {
+                console.warn("Could not fetch settings from server, falling back to local.", error);
+                // FALLBACK to localStorage if offline
+                const savedSettings = JSON.parse(localStorage.getItem(`nextlySettings_${currentUser}`));
+                settings = { ...defaultSettings, ...savedSettings };
+            }
+        } else {
+            // No user logged in, use defaults
+            settings = { ...defaultSettings };
         }
+        
+        // Save the potentially new settings to local storage for caching
+        if(currentUser) localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
+
+        // Update the UI with the loaded settings
+        updateSettingsUI();
+    };
+
+    const updateSettingsUI = () => {
         enableNotificationsToggle.checked = settings.notificationsEnabled;
         dailySummaryToggle.checked = settings.dailySummaryEnabled;
         dailySummaryTimeInput.value = settings.dailySummaryTime;
         dailySummaryTimeContainer.classList.toggle('hidden', !settings.dailySummaryEnabled);
         hourlyReminderToggle.checked = settings.hourlyReminderEnabled;
+        
         themeSelector.querySelectorAll('.active').forEach(b => b.classList.remove('active'));
         accentColorSelector.querySelectorAll('.active').forEach(b => b.classList.remove('active'));
         fontSizeSelector.querySelectorAll('.active').forEach(b => b.classList.remove('active'));
+        
         document.querySelector(`#theme-selector button[value="${settings.theme}"]`)?.classList.add('active');
         document.querySelector(`#accent-color-selector .color-swatch[data-color="${settings.accentColor}"]`)?.classList.add('active');
         document.querySelector(`#font-size-selector button[value="${settings.fontSize}"]`)?.classList.add('active');
+        
         applyTheme(settings.theme);
         applyAccentColor(settings.accentColor);
         applyFontSize(settings.fontSize);
     };
+
     const applyTheme = (theme) => {
         document.body.dataset.theme = theme;
         if (theme === 'system') {
@@ -277,6 +274,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     const applyAccentColor = (color) => document.body.dataset.accentColor = color;
     const applyFontSize = (size) => document.body.dataset.fontSize = size;
+    
+    // ... (All other functions like calculateAndDisplayStats, generateCalendar, renderTasks, etc., remain the same)
     
     // --- Analysis & Charting Functions ---
     const calculateAndDisplayStats = () => {
@@ -479,7 +478,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     themeToggle.addEventListener('click', () => {
         settings.theme = themeToggle.checked ? 'dark' : 'light';
-        applyTheme(settings.theme); saveSettings();
+        applyTheme(settings.theme); 
+        localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
+        saveSettingsToServer();
         themeSelector.querySelector('.active')?.classList.remove('active');
         document.querySelector(`#theme-selector button[value="${settings.theme}"]`)?.classList.add('active');
     });
@@ -556,8 +557,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     confirmCompleteBtn.addEventListener('click', async () => {
         if (!currentUser) return;
-        const taskToCompleteId = taskIdToComplete;
-        await fetch(`/api/tasks/${currentUser}/${taskToCompleteId}`, {
+        await fetch(`/api/tasks/${currentUser}/${taskIdToComplete}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ completed: true })
@@ -568,40 +568,37 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     closeSettingsBtn.addEventListener('click', closeSettingsModal);
     closeAnalysisBtn.addEventListener('click', closeAnalysisModal);
-    
-    enableNotificationsToggle.addEventListener('change', (e) => {
-    settings.notificationsEnabled = e.target.checked;
-    saveSettings(); // Saves to localStorage
-    saveSettingsToServer(); // *** ADD THIS ***
+
+    // --- REVISED SETTINGS EVENT LISTENERS ---
+    enableNotificationsToggle.addEventListener('change', (e) => { 
+        settings.notificationsEnabled = e.target.checked; 
+        localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
+        saveSettingsToServer();
     });
-
-// critical and important timing selects are removed, so their listeners should be gone.
-
-dailySummaryToggle.addEventListener('change', (e) => {
-    settings.dailySummaryEnabled = e.target.checked;
-    dailySummaryTimeContainer.classList.toggle('hidden', !e.target.checked);
-    saveSettings();
-    saveSettingsToServer(); // *** ADD THIS ***
-});
-
-dailySummaryTimeInput.addEventListener('change', (e) => {
-    settings.dailySummaryTime = e.target.value;
-    saveSettings();
-    saveSettingsToServer(); // *** ADD THIS ***
-});
-
-hourlyReminderToggle.addEventListener('change', (e) => {
-    settings.hourlyReminderEnabled = e.target.checked;
-    saveSettings();
-    saveSettingsToServer(); // *** ADD THIS ***
-});
-
+    dailySummaryToggle.addEventListener('change', (e) => { 
+        settings.dailySummaryEnabled = e.target.checked; 
+        dailySummaryTimeContainer.classList.toggle('hidden', !e.target.checked); 
+        localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
+        saveSettingsToServer();
+    });
+    dailySummaryTimeInput.addEventListener('change', (e) => { 
+        settings.dailySummaryTime = e.target.value; 
+        localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
+        saveSettingsToServer();
+    });
+    hourlyReminderToggle.addEventListener('change', (e) => { 
+        settings.hourlyReminderEnabled = e.target.checked; 
+        localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
+        saveSettingsToServer();
+    });
     themeSelector.addEventListener('click', (e) => {
         if (e.target.tagName === 'BUTTON') {
             themeSelector.querySelector('.active').classList.remove('active');
             e.target.classList.add('active');
             settings.theme = e.target.value;
-            applyTheme(settings.theme); saveSettings();
+            applyTheme(settings.theme); 
+            localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
+            saveSettingsToServer();
         }
     });
     accentColorSelector.addEventListener('click', (e) => {
@@ -609,7 +606,9 @@ hourlyReminderToggle.addEventListener('change', (e) => {
             accentColorSelector.querySelector('.active').classList.remove('active');
             e.target.classList.add('active');
             settings.accentColor = e.target.dataset.color;
-            applyAccentColor(settings.accentColor); saveSettings();
+            applyAccentColor(settings.accentColor); 
+            localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
+            saveSettingsToServer();
         }
     });
     fontSizeSelector.addEventListener('click', (e) => {
@@ -617,22 +616,18 @@ hourlyReminderToggle.addEventListener('change', (e) => {
             fontSizeSelector.querySelector('.active').classList.remove('active');
             e.target.classList.add('active');
             settings.fontSize = e.target.value;
-            applyFontSize(settings.fontSize); saveSettings();
+            applyFontSize(settings.fontSize); 
+            localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
+            saveSettingsToServer();
         }
     });
+
     deleteAllDataBtn.addEventListener('click', openDeleteDataModal);
     cancelDeleteDataBtn.addEventListener('click', closeDeleteDataModal);
     deleteConfirmInput.addEventListener('input', (e) => { confirmDeleteDataBtn.disabled = e.target.value !== 'DELETE'; });
     confirmDeleteDataBtn.addEventListener('click', async () => {
         if (!currentUser) return;
-        // In a real app with a backend, we'd send one request to a new route like /api/tasks/:username/all
-        const allTaskIds = [];
-        for (const date in tasks) {
-            tasks[date].forEach(task => allTaskIds.push(task.id));
-        }
-        await Promise.all(allTaskIds.map(id => 
-            fetch(`/api/tasks/${currentUser}/${id}`, { method: 'DELETE' })
-        ));
+        await fetch(`/api/tasks/${currentUser}/all`, { method: 'DELETE' }); // Assumes a route to delete all tasks exists
         tasks = {};
         closeDeleteDataModal();
         updateUIForNewDate();
@@ -641,18 +636,18 @@ hourlyReminderToggle.addEventListener('change', (e) => {
     // --- Drag/Drop & Swipe Handlers ---
     let draggedItem = null;
     taskList.addEventListener('dragstart', (e) => { if (e.target.classList.contains('task-item')) { draggedItem = e.target; setTimeout(() => e.target.classList.add('dragging'), 0); } });
-    taskList.addEventListener('dragend', () => { if (draggedItem) { draggedItem.classList.remove('dragging'); draggedItem = null; const date = datePicker.value; const ids = Array.from(taskList.querySelectorAll('.task-item:not(.completed)')).map(item => item.dataset.id); if(tasks[date]) { const uncompletedTasks = tasks[date].filter(t => !t.completed); uncompletedTasks.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id)); const completedTasks = tasks[date].filter(t => t.completed); tasks[date] = [...uncompletedTasks, ...completedTasks]; /* saveTasks(); */ } } }); // Save on reorder might need backend logic
+    taskList.addEventListener('dragend', () => { if (draggedItem) { draggedItem.classList.remove('dragging'); draggedItem = null; } });
     taskList.addEventListener('dragover', (e) => { e.preventDefault(); const afterElement = getDragAfterElement(taskList, e.clientY); if (draggedItem) { if (afterElement == null) taskList.appendChild(draggedItem); else taskList.insertBefore(draggedItem, afterElement); } });
     function getDragAfterElement(container, y) { const draggableElements = [...container.querySelectorAll('.task-item:not(.dragging)')]; return draggableElements.reduce((closest, child) => { const box = child.getBoundingClientRect(); const offset = y - box.top - box.height / 2; if (offset < 0 && offset > closest.offset) return { offset: offset, element: child }; else return closest; }, { offset: Number.NEGATIVE_INFINITY }).element; }
     function addSwipeAndDragListeners(element) {
-        let isDragging = false, startX, currentX, diff = 0;
+        let isDragging = false, startX, diff = 0;
         const getClientX = (e) => e.touches ? e.touches[0].clientX : e.clientX;
         const dragStart = (e) => { startX = getClientX(e); isDragging = true; element.style.transition = ''; };
-        const dragMove = (e) => { if (!isDragging || element.classList.contains('dragging')) return; currentX = getClientX(e); diff = currentX - startX; if (Math.abs(diff) > 10) element.style.transform = `translateX(${diff}px)`; };
+        const dragMove = (e) => { if (!isDragging || element.classList.contains('dragging')) return; diff = currentX - startX; element.style.transform = `translateX(${diff}px)`; };
         const dragEnd = () => {
-            if (!isDragging) return; isDragging = false; element.style.transition = 'transform 0.3s ease'; const threshold = 100;
-            if (diff > threshold) showCompleteConfirmModal(element.dataset.id);
-            else if (diff < -threshold) showDeleteConfirmModal(element.dataset.id);
+            if (!isDragging) return; isDragging = false; element.style.transition = 'transform 0.3s ease';
+            if (diff > 100) showCompleteConfirmModal(element.dataset.id);
+            else if (diff < -100) showDeleteConfirmModal(element.dataset.id);
             element.style.transform = 'translateX(0)'; diff = 0;
         };
         element.addEventListener('touchstart', dragStart); element.addEventListener('touchmove', dragMove); element.addEventListener('touchend', dragEnd);
@@ -661,14 +656,13 @@ hourlyReminderToggle.addEventListener('change', (e) => {
     }
 
     // --- Initial App Setup ---
-    const initializeApp = () => {
+    const initializeApp = async () => {
         const savedUser = localStorage.getItem('nextlyUser');
         if (savedUser) {
-            login(savedUser);
+            await login(savedUser);
         } else {
-            // If no user is saved, ensure the body does not have the logged-in class
             body.classList.remove('logged-in');
-            loadAllUserData();
+            await loadAllUserData(); // Load default view
         }
     };
 
