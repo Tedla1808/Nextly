@@ -7,7 +7,11 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const cron = require('node-cron');
 const Task = require('./models/task');
-const User = require('./models/user'); // Ensure User model is required
+
+// --- THIS IS THE CRITICAL FIX ---
+// Ensure the User model is correctly required at the top level
+const User = require('./models/user'); 
+// --------------------------------
 
 // --- Firebase Admin SDK Initialization ---
 const admin = require('firebase-admin');
@@ -36,10 +40,12 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // --- API Routes ---
 const { router: notificationRoutes } = require('./routes/notifications');
+const userRoutes = require('./routes/user'); // Require the user routes
+
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/tasks', require('./routes/tasks'));
 app.use('/api/notifications', notificationRoutes);
-app.use('/api/user', require('./routes/user'));
+app.use('/api/user', userRoutes); // Use the user routes
 
 // ==============================================================================
 // === THE DEFINITIVE, TIMEZONE-AWARE, MINUTELY CRON JOB FOR ALL NOTIFICATIONS ===
@@ -50,6 +56,7 @@ cron.schedule('* * * * *', async () => { // Runs EVERY MINUTE
     try {
         const now = new Date();
         
+        // This line will now work correctly because `User` is the Mongoose model
         const eligibleUsers = await User.find({
             'settings.notificationsEnabled': true,
             fcmToken: { $ne: null, $exists: true }
@@ -81,8 +88,6 @@ cron.schedule('* * * * *', async () => { // Runs EVERY MINUTE
             }
 
             // --- 2. 3-HOURLY REMINDER ---
-            // Runs if enabled, at the top of the hour, for hours divisible by 3,
-            // and NOT during the user's briefing hour.
             if (user.settings.hourlyReminderEnabled && currentUserMinute === 0 && currentUserHour % 3 === 0 && currentUserHour !== userBriefingHour) {
                 const todayString = now.toLocaleDateString('en-CA', { timeZone: userTimezone });
                 const uncompletedTasks = await Task.find({ username: user.username, date: todayString, completed: false });
@@ -99,8 +104,6 @@ cron.schedule('* * * * *', async () => { // Runs EVERY MINUTE
         console.error('Error during the minutely notification job:', error);
     }
 });
-// ==============================================================================
-// ============================ END OF CRON JOB =================================
 // ==============================================================================
 
 
