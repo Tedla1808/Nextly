@@ -1,78 +1,80 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- DOM Element References ---
-    const menuBtn = document.getElementById('menu-btn');
-    const closeMenuBtn = document.getElementById('close-menu-btn');
-    const mottoInput = document.getElementById('motto-input');
-    const taskList = document.getElementById('task-list');
-    const emptyState = document.getElementById('empty-state');
-    const addTaskBtn = document.getElementById('add-task-btn');
-    const openSettingsBtn = document.getElementById('open-settings-btn');
-    const openAnalysisBtn = document.getElementById('open-analysis-btn');
-    const searchBar = document.getElementById('search-bar');
-    const loginView = document.getElementById('login-view');
-    const usernameInput = document.getElementById('username-input');
-    const passwordInput = document.getElementById('password-input');
-    const authTitle = document.getElementById('auth-title');
-    const authBtn = document.getElementById('auth-btn');
-    const authToggleLink = document.getElementById('auth-toggle-link');
-    const profileView = document.getElementById('profile-view');
-    const currentUserDisplay = document.getElementById('current-user-display');
-    const logoutBtn = document.getElementById('logout-btn');
+    // --- Defensive Element References ---
+    const getEl = (id) => document.getElementById(id);
+
+    const menuBtn = getEl('menu-btn');
+    const closeMenuBtn = getEl('close-menu-btn');
+    const mottoInput = getEl('motto-input');
+    const taskList = getEl('task-list');
+    const emptyState = getEl('empty-state');
+    const addTaskBtn = getEl('add-task-btn');
+    const openSettingsBtn = getEl('open-settings-btn');
+    const openAnalysisBtn = getEl('open-analysis-btn');
+    const searchBar = getEl('search-bar');
+    const loginView = getEl('login-view');
+    const usernameInput = getEl('username-input');
+    const passwordInput = getEl('password-input');
+    const authTitle = getEl('auth-title');
+    const authBtn = getEl('auth-btn');
+    const authToggleLink = getEl('auth-toggle-link');
+    const profileView = getEl('profile-view');
+    const currentUserDisplay = getEl('current-user-display');
+    const logoutBtn = getEl('logout-btn');
+    const mainApp = getEl('main-app');
     const body = document.body;
 
-    // Calendar References
-    const monthYearHeader = document.getElementById('month-year-header');
-    const calendarDaysGrid = document.getElementById('calendar-days-grid');
-    const prevMonthBtn = document.getElementById('prev-month-btn');
-    const nextMonthBtn = document.getElementById('next-month-btn');
-    const todayBtn = document.getElementById('today-btn');
-    const jumpToDateBtn = document.getElementById('jump-to-date-btn');
-    const toggleCalendarBtn = document.getElementById('toggle-calendar-btn');
-    const calendarBody = document.getElementById('calendar-body');
-    const selectedDateDisplay = document.getElementById('selected-date-display');
-    const datePicker = document.getElementById('date-picker');
+    const monthYearHeader = getEl('month-year-header');
+    const calendarDaysGrid = getEl('calendar-days-grid');
+    const prevMonthBtn = getEl('prev-month-btn');
+    const nextMonthBtn = getEl('next-month-btn');
+    const todayBtn = getEl('today-btn');
+    const jumpToDateBtn = getEl('jump-to-date-btn');
+    const toggleCalendarBtn = getEl('toggle-calendar-btn');
+    const calendarBody = getEl('calendar-body');
+    const selectedDateDisplay = getEl('selected-date-display');
+    const datePicker = getEl('date-picker');
 
-    // Modal References
-    const taskModal = document.getElementById('task-modal');
-    const modalTitle = document.getElementById('modal-title');
-    const taskForm = document.getElementById('task-form');
-    const cancelBtn = document.getElementById('cancel-btn');
-    const editTaskDateContainer = document.getElementById('edit-task-date-container');
-    const editTaskDateInput = document.getElementById('edit-task-date');
-    const deleteConfirmModal = document.getElementById('delete-confirm-modal');
-    const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
-    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
-    const completeConfirmModal = document.getElementById('complete-confirm-modal');
-    const cancelCompleteBtn = document.getElementById('cancel-complete-btn');
-    const confirmCompleteBtn = document.getElementById('confirm-complete-btn');
-    const jumpToDateModal = document.getElementById('jump-to-date-modal');
-    const jumpMonthSelect = document.getElementById('jump-month');
-    const jumpDaySelect = document.getElementById('jump-day');
-    const jumpYearInput = document.getElementById('jump-year');
-    const cancelJumpBtn = document.getElementById('cancel-jump-btn');
-    const goToDateBtn = document.getElementById('go-to-date-btn');
-    const settingsModal = document.getElementById('settings-modal');
-    const closeSettingsBtn = document.getElementById('close-settings-btn');
-    const enableNotificationsToggle = document.getElementById('enable-notifications');
-    const hourlyReminderToggle = document.getElementById('hourly-reminder');
-    const dailySummaryToggle = document.getElementById('daily-summary');
-    const dailySummaryTimeContainer = document.getElementById('daily-summary-time-container');
-    const dailySummaryTimeInput = document.getElementById('daily-summary-time');
-    const themeSelector = document.getElementById('theme-selector');
-    const accentColorSelector = document.getElementById('accent-color-selector');
-    const fontSizeSelector = document.getElementById('font-size-selector');
-    const deleteAllDataBtn = document.getElementById('delete-all-data-btn');
-    const deleteDataConfirmModal = document.getElementById('delete-data-confirm-modal');
-    const cancelDeleteDataBtn = document.getElementById('cancel-delete-data-btn');
-    const confirmDeleteDataBtn = document.getElementById('confirm-delete-data-btn');
-    const deleteConfirmInput = document.getElementById('delete-confirm-input');
-    const analysisModal = document.getElementById('analysis-modal');
-    const closeAnalysisBtn = document.getElementById('close-analysis-btn');
-    const completedCountEl = document.getElementById('completed-count');
-    const overdueCountEl = document.getElementById('overdue-count');
-    const totalCountEl = document.getElementById('total-count');
-    const completionRateEl = document.getElementById('completion-rate');
-    const productivityChartCanvas = document.getElementById('productivity-chart');
+    const taskModal = getEl('task-modal');
+    const modalTitle = getEl('modal-title');
+    const taskForm = getEl('task-form');
+    const cancelBtn = getEl('cancel-btn');
+    const editTaskDateContainer = getEl('edit-task-date-container');
+    const editTaskDateInput = getEl('edit-task-date');
+    const deleteConfirmModal = getEl('delete-confirm-modal');
+    const cancelDeleteBtn = getEl('cancel-delete-btn');
+    const confirmDeleteBtn = getEl('confirm-delete-btn');
+    const completeConfirmModal = getEl('complete-confirm-modal');
+    const cancelCompleteBtn = getEl('cancel-complete-btn');
+    const confirmCompleteBtn = getEl('confirm-complete-btn');
+    const jumpToDateModal = getEl('jump-to-date-modal');
+    const jumpMonthSelect = getEl('jump-month');
+    const jumpDaySelect = getEl('jump-day');
+    const jumpYearInput = getEl('jump-year');
+    const cancelJumpBtn = getEl('cancel-jump-btn');
+    const goToDateBtn = getEl('go-to-date-btn');
+    const settingsModal = getEl('settings-modal');
+    const closeSettingsBtn = getEl('close-settings-btn');
+    const enableNotificationsToggle = getEl('enable-notifications');
+    const hourlyReminderToggle = getEl('hourly-reminder');
+    const dailySummaryToggle = getEl('daily-summary');
+    const dailySummaryTimeContainer = getEl('daily-summary-time-container');
+    const dailySummaryTimeInput = getEl('daily-summary-time');
+    const themeSelector = getEl('theme-selector');
+    const accentColorSelector = getEl('accent-color-selector');
+    const fontSizeSelector = getEl('font-size-selector');
+    const deleteAllDataBtn = getEl('delete-all-data-btn');
+    const deleteDataConfirmModal = getEl('delete-data-confirm-modal');
+    const cancelDeleteDataBtn = getEl('cancel-delete-data-btn');
+    const confirmDeleteDataBtn = getEl('confirm-delete-data-btn');
+    const deleteConfirmInput = getEl('delete-confirm-input');
+    const analysisModal = getEl('analysis-modal');
+    const closeAnalysisBtn = getEl('close-analysis-btn');
+    const completedCountEl = getEl('completed-count');
+    const overdueCountEl = getEl('overdue-count');
+    const totalCountEl = getEl('total-count');
+    const completionRateEl = getEl('completion-rate');
+    const productivityChartCanvas = getEl('productivity-chart');
+    const themeToggle = getEl('theme-toggle');
 
     // --- State Management ---
     let tasks = {};
@@ -84,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let productivityChart = null;
     let currentUser = null;
     let isLoginMode = true;
-    let settings = {}; // Start with an empty object
+    let settings = {};
 
     const defaultSettings = {
         notificationsEnabled: true,
@@ -99,6 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- User & API Functions ---
     const handleAuth = async () => {
+        if (!usernameInput || !passwordInput) return;
         const username = usernameInput.value.trim().toLowerCase();
         const password = passwordInput.value;
         if (!username || !password) return alert('Please enter both a username and password.');
@@ -126,40 +129,37 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!username) return;
         currentUser = username;
         localStorage.setItem('nextlyUser', currentUser);
-        
-        body.classList.add('logged-in'); 
-        currentUserDisplay.textContent = currentUser;
-        loginView.classList.add('hidden');
-        profileView.classList.remove('hidden');
+
+        if (body) body.classList.add('logged-in');
+        if (currentUserDisplay) currentUserDisplay.textContent = currentUser;
+        if (loginView) loginView.classList.add('hidden');
+        if (profileView) profileView.classList.remove('hidden');
 
         if (typeof Android !== "undefined" && Android.registerFCMToken) {
             Android.registerFCMToken(currentUser);
         }
-        
+
         await loadAllUserData();
-        
-        // This is now crucial to ensure timezone is sent on first login
-        await saveSettingsToServer(); 
-        
+        await saveSettingsToServer(); // Crucial to send timezone on first login
         closeMenu();
     };
 
     const logout = () => {
         currentUser = null;
-        localStorage.clear(); // Clear all local storage for this app
+        localStorage.clear();
         tasks = {};
 
-        body.classList.remove('logged-in');
-        currentUserDisplay.textContent = '';
-        loginView.classList.remove('hidden');
-        profileView.classList.add('hidden');
+        if (body) body.classList.remove('logged-in');
+        if (currentUserDisplay) currentUserDisplay.textContent = '';
+        if (loginView) loginView.classList.remove('hidden');
+        if (profileView) profileView.classList.add('hidden');
         if (!isLoginMode) toggleAuthMode();
 
         loadAllUserData();
     };
 
     const loadAllUserData = async () => {
-        await loadSettings(); // Now fetches from server
+        await loadSettings();
         loadMotto();
         await loadTasksForCurrentUser();
         updateUIForNewDate();
@@ -187,23 +187,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const toggleAuthMode = () => {
         isLoginMode = !isLoginMode;
-        authTitle.textContent = isLoginMode ? 'Login' : 'Sign Up';
-        authBtn.textContent = isLoginMode ? 'Login' : 'Sign Up';
-        authToggleLink.textContent = isLoginMode ? "Don't have an account? Sign Up" : "Already have an account? Login";
-        passwordInput.value = '';
-        usernameInput.value = '';
+        if (authTitle) authTitle.textContent = isLoginMode ? 'Login' : 'Sign Up';
+        if (authBtn) authBtn.textContent = isLoginMode ? 'Login' : 'Sign Up';
+        if (authToggleLink) authToggleLink.textContent = isLoginMode ? "Don't have an account? Sign Up" : "Already have an account? Login";
+        if (passwordInput) passwordInput.value = '';
+        if (usernameInput) usernameInput.value = '';
     };
 
     const formatDate = (d) => d.toISOString().split('T')[0];
-    const saveMotto = () => { if (currentUser) localStorage.setItem(`userMotto_${currentUser}`, mottoInput.value); };
-    const loadMotto = () => { mottoInput.value = currentUser ? localStorage.getItem(`userMotto_${currentUser}`) || "Your daily focus motto" : "Your daily focus motto"; };
+    const saveMotto = () => { if (currentUser && mottoInput) localStorage.setItem(`userMotto_${currentUser}`, mottoInput.value); };
+    const loadMotto = () => { if (mottoInput) mottoInput.value = currentUser ? localStorage.getItem(`userMotto_${currentUser}`) || "Your daily focus motto" : "Your daily focus motto"; };
 
-    // --- Settings Functions (REWRITTEN) ---
+    // --- Settings Functions ---
     const saveSettingsToServer = async () => {
         if (!currentUser) return;
-        
         const settingsPayload = { ...settings, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone };
-    
         try {
             await fetch(`/api/user/${currentUser}/settings`, {
                 method: 'POST',
@@ -219,74 +217,82 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadSettings = async () => {
         if (currentUser) {
             try {
-                // SERVER is the source of truth
                 const response = await fetch(`/api/user/${currentUser}/settings`);
+                if (!response.ok) throw new Error('Failed to fetch settings');
                 const serverSettings = await response.json();
                 settings = { ...defaultSettings, ...serverSettings };
             } catch (error) {
                 console.warn("Could not fetch settings from server, falling back to local.", error);
-                // FALLBACK to localStorage if offline
                 const savedSettings = JSON.parse(localStorage.getItem(`nextlySettings_${currentUser}`));
                 settings = { ...defaultSettings, ...savedSettings };
             }
         } else {
-            // No user logged in, use defaults
             settings = { ...defaultSettings };
         }
-        
-        // Save the potentially new settings to local storage for caching
-        if(currentUser) localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
-
-        // Update the UI with the loaded settings
+        if (currentUser) localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
         updateSettingsUI();
     };
 
     const updateSettingsUI = () => {
-        enableNotificationsToggle.checked = settings.notificationsEnabled;
-        dailySummaryToggle.checked = settings.dailySummaryEnabled;
-        dailySummaryTimeInput.value = settings.dailySummaryTime;
-        dailySummaryTimeContainer.classList.toggle('hidden', !settings.dailySummaryEnabled);
-        hourlyReminderToggle.checked = settings.hourlyReminderEnabled;
-        
-        themeSelector.querySelectorAll('.active').forEach(b => b.classList.remove('active'));
-        accentColorSelector.querySelectorAll('.active').forEach(b => b.classList.remove('active'));
-        fontSizeSelector.querySelectorAll('.active').forEach(b => b.classList.remove('active'));
-        
-        document.querySelector(`#theme-selector button[value="${settings.theme}"]`)?.classList.add('active');
-        document.querySelector(`#accent-color-selector .color-swatch[data-color="${settings.accentColor}"]`)?.classList.add('active');
-        document.querySelector(`#font-size-selector button[value="${settings.fontSize}"]`)?.classList.add('active');
-        
+        if (!settings) return;
+
+        if (enableNotificationsToggle) enableNotificationsToggle.checked = settings.notificationsEnabled;
+        if (dailySummaryToggle) dailySummaryToggle.checked = settings.dailySummaryEnabled;
+        if (dailySummaryTimeInput) dailySummaryTimeInput.value = settings.dailySummaryTime;
+        if (dailySummaryTimeContainer) dailySummaryTimeContainer.classList.toggle('hidden', !settings.dailySummaryEnabled);
+        if (hourlyReminderToggle) hourlyReminderToggle.checked = settings.hourlyReminderEnabled;
+
+        if (themeSelector) {
+            themeSelector.querySelectorAll('.active').forEach(b => b.classList.remove('active'));
+            const activeBtn = themeSelector.querySelector(`button[value="${settings.theme}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+        }
+        if (accentColorSelector) {
+            accentColorSelector.querySelectorAll('.active').forEach(b => b.classList.remove('active'));
+            const activeSwatch = accentColorSelector.querySelector(`.color-swatch[data-color="${settings.accentColor}"]`);
+            if (activeSwatch) activeSwatch.classList.add('active');
+        }
+        if (fontSizeSelector) {
+            fontSizeSelector.querySelectorAll('.active').forEach(b => b.classList.remove('active'));
+            const activeBtn = fontSizeSelector.querySelector(`button[value="${settings.fontSize}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+        }
+
         applyTheme(settings.theme);
         applyAccentColor(settings.accentColor);
         applyFontSize(settings.fontSize);
     };
 
     const applyTheme = (theme) => {
-        document.body.dataset.theme = theme;
+        if (!body) return;
+        body.dataset.theme = theme;
         if (theme === 'system') {
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            document.body.classList.toggle('dark-theme', prefersDark);
-            themeToggle.checked = prefersDark;
+            body.classList.toggle('dark-theme', prefersDark);
+            if (themeToggle) themeToggle.checked = prefersDark;
         } else {
-            document.body.classList.toggle('dark-theme', theme === 'dark');
-            themeToggle.checked = theme === 'dark';
+            body.classList.toggle('dark-theme', theme === 'dark');
+            if (themeToggle) themeToggle.checked = theme === 'dark';
         }
     };
-    const applyAccentColor = (color) => document.body.dataset.accentColor = color;
-    const applyFontSize = (size) => document.body.dataset.fontSize = size;
-    
-    // ... (All other functions like calculateAndDisplayStats, generateCalendar, renderTasks, etc., remain the same)
-    
+    const applyAccentColor = (color) => { if (body) body.dataset.accentColor = color; };
+    const applyFontSize = (size) => { if (body) body.dataset.fontSize = size; };
+
     // --- Analysis & Charting Functions ---
     const calculateAndDisplayStats = () => {
+        if (!completedCountEl || !overdueCountEl || !totalCountEl || !completionRateEl) return;
         let totalTasks = 0, completedTasks = 0, overdueTasks = 0;
-        const today = new Date(); today.setHours(0, 0, 0, 0);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
         Object.keys(tasks).forEach(dateKey => {
             tasks[dateKey].forEach(task => {
                 totalTasks++;
                 const taskDate = new Date(dateKey + 'T00:00:00');
-                if (task.completed) { completedTasks++; }
-                else if (taskDate < today) { overdueTasks++; }
+                if (task.completed) {
+                    completedTasks++;
+                } else if (taskDate < today) {
+                    overdueTasks++;
+                }
             });
         });
         const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
@@ -296,7 +302,8 @@ document.addEventListener('DOMContentLoaded', () => {
         completionRateEl.textContent = `${completionRate}%`;
         const last7DaysLabels = [], last7DaysData = [];
         for (let i = 6; i >= 0; i--) {
-            const date = new Date(); date.setDate(date.getDate() - i);
+            const date = new Date();
+            date.setDate(date.getDate() - i);
             const formattedDate = formatDate(date);
             last7DaysLabels.push(date.toLocaleDateString('default', { weekday: 'short' }));
             last7DaysData.push((tasks[formattedDate] || []).filter(task => task.completed).length);
@@ -304,18 +311,22 @@ document.addEventListener('DOMContentLoaded', () => {
         renderProductivityChart(last7DaysLabels, last7DaysData);
     };
     const renderProductivityChart = (labels, data) => {
+        if (!productivityChartCanvas) return;
         if (productivityChart) productivityChart.destroy();
         const accentColor = getComputedStyle(document.body).getPropertyValue('--primary-color');
         productivityChart = new Chart(productivityChartCanvas, {
-            type: 'bar', data: { labels, datasets: [{ label: 'Tasks Completed', data, backgroundColor: accentColor + '80', borderColor: accentColor, borderWidth: 1, borderRadius: 5 }] },
+            type: 'bar',
+            data: { labels, datasets: [{ label: 'Tasks Completed', data, backgroundColor: accentColor + '80', borderColor: accentColor, borderWidth: 1, borderRadius: 5 }] },
             options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }, plugins: { legend: { display: false } } }
         });
     };
-    
+
     // --- Calendar & Task Functions ---
     const generateCalendar = (date) => {
+        if (!calendarDaysGrid || !monthYearHeader) return;
         calendarDaysGrid.innerHTML = '';
-        const today = new Date(); today.setHours(0, 0, 0, 0);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
         const month = date.getMonth(), year = date.getFullYear();
         monthYearHeader.textContent = `${date.toLocaleString('default', { month: 'long' })} ${year}`;
         const firstDayOfMonth = new Date(year, month, 1);
@@ -337,24 +348,27 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     const updateUIForNewDate = () => {
         currentDate.setHours(0, 0, 0, 0);
-        datePicker.value = formatDate(currentDate);
-        selectedDateDisplay.textContent = currentDate.toLocaleDateString('default', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        searchBar.value = '';
-        document.getElementById('selected-date-display').classList.remove('hidden');
-        document.querySelector('.calendar-container').classList.remove('hidden');
+        if (datePicker) datePicker.value = formatDate(currentDate);
+        if (selectedDateDisplay) selectedDateDisplay.textContent = currentDate.toLocaleDateString('default', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        if (searchBar) searchBar.value = '';
+        if (selectedDateDisplay) selectedDateDisplay.classList.remove('hidden');
+        const calContainer = document.querySelector('.calendar-container');
+        if (calContainer) calContainer.classList.remove('hidden');
         generateCalendar(currentDate);
         renderTasks();
     };
     const renderTasks = () => {
+        if (!taskList || !emptyState || !datePicker) return;
         const selectedDate = datePicker.value;
         const tasksForDay = tasks[selectedDate] || [];
         taskList.innerHTML = '';
-        emptyState.querySelector('p').textContent = 'All clear! Enjoy your day.';
-        emptyState.querySelector('span').innerHTML = 'Add a new task to get started.';
-        
+        const emptyStateP = emptyState.querySelector('p');
+        const emptyStateSpan = emptyState.querySelector('span');
+        if (emptyStateP) emptyStateP.textContent = 'All clear! Enjoy your day.';
+        if (emptyStateSpan) emptyStateSpan.innerHTML = 'Add a new task to get started.';
+
         const uncompletedTasks = tasksForDay.filter(t => !t.completed);
         const completedTasks = tasksForDay.filter(t => t.completed);
-
         emptyState.classList.toggle('hidden', uncompletedTasks.length > 0);
 
         [...uncompletedTasks, ...completedTasks].forEach(task => {
@@ -365,17 +379,21 @@ document.addEventListener('DOMContentLoaded', () => {
             taskElement.setAttribute('data-priority', task.priority);
             taskElement.setAttribute('draggable', !task.completed);
             taskElement.innerHTML = `<div class="task-content"><h3>${task.title}</h3><p>${task.description}</p></div>`;
-            taskElement.querySelector('.task-content').addEventListener('click', () => openTaskModal(task));
+            const taskContent = taskElement.querySelector('.task-content');
+            if (taskContent) taskContent.addEventListener('click', () => openTaskModal(task));
             if (!task.completed) addSwipeAndDragListeners(taskElement);
             taskList.appendChild(taskElement);
         });
     };
     const renderSearchResults = (results, query) => {
+        if (!taskList || !emptyState) return;
         taskList.innerHTML = '';
+        const emptyStateP = emptyState.querySelector('p');
+        const emptyStateSpan = emptyState.querySelector('span');
         if (results.length === 0) {
             emptyState.classList.remove('hidden');
-            emptyState.querySelector('p').textContent = 'No results found';
-            emptyState.querySelector('span').textContent = `No tasks match your search for "${query}".`;
+            if (emptyStateP) emptyStateP.textContent = 'No results found';
+            if (emptyStateSpan) emptyStateSpan.textContent = `No tasks match your search for "${query}".`;
         } else {
             emptyState.classList.add('hidden');
             results.forEach(task => {
@@ -390,7 +408,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 taskElement.addEventListener('click', () => {
                     currentDate = new Date(task.date + 'T00:00:00');
                     updateUIForNewDate();
-                    const taskToOpen = tasks[task.date].find(t => t.id === task.id);
+                    const taskToOpen = tasks[task.date]?.find(t => t.id === task.id);
                     if (taskToOpen) openTaskModal(taskToOpen);
                     closeMenu();
                 });
@@ -398,27 +416,28 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     };
-    
+
     // --- Modal Management ---
-    const openMenu = () => document.body.classList.add('side-menu-active');
+    const openMenu = () => { if (body) body.classList.add('side-menu-active'); };
     const closeMenu = () => {
-        document.body.classList.remove('side-menu-active');
-        if (searchBar.value !== '') {
+        if (body) body.classList.remove('side-menu-active');
+        if (searchBar && searchBar.value !== '') {
             searchBar.value = '';
             updateUIForNewDate();
         }
     };
     const openTaskModal = (task = null) => {
+        if (!taskForm || !modalTitle || !editTaskDateContainer || !taskModal) return;
         taskForm.reset();
         if (task) {
             modalTitle.textContent = 'Edit Task';
             currentTaskId = task.id;
             originalTaskDate = task.date;
-            document.getElementById('task-id').value = task.id;
-            document.getElementById('task-title').value = task.title;
-            document.getElementById('task-description').value = task.description;
-            document.getElementById('task-priority').value = task.priority;
-            editTaskDateInput.value = originalTaskDate;
+            getEl('task-id').value = task.id;
+            getEl('task-title').value = task.title;
+            getEl('task-description').value = task.description;
+            getEl('task-priority').value = task.priority;
+            if (editTaskDateInput) editTaskDateInput.value = originalTaskDate;
             editTaskDateContainer.classList.remove('hidden');
         } else {
             modalTitle.textContent = 'Add New Task';
@@ -428,18 +447,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         taskModal.classList.remove('hidden');
     };
-    const closeTaskModal = () => { taskModal.classList.add('hidden'); originalTaskDate = null; };
-    const showDeleteConfirmModal = (taskId) => { taskIdToDelete = taskId; deleteConfirmModal.classList.remove('hidden'); };
-    const hideDeleteConfirmModal = () => { deleteConfirmModal.classList.add('hidden'); taskIdToDelete = null; };
-    const showCompleteConfirmModal = (taskId) => { taskIdToComplete = taskId; completeConfirmModal.classList.remove('hidden'); };
-    const hideCompleteConfirmModal = () => { completeConfirmModal.classList.add('hidden'); taskIdToComplete = null; };
-    const openSettingsModal = () => settingsModal.classList.remove('hidden');
-    const closeSettingsModal = () => settingsModal.classList.add('hidden');
-    const openAnalysisModal = () => { calculateAndDisplayStats(); analysisModal.classList.remove('hidden'); };
-    const closeAnalysisModal = () => analysisModal.classList.add('hidden');
-    const openDeleteDataModal = () => deleteDataConfirmModal.classList.remove('hidden');
-    const closeDeleteDataModal = () => { deleteConfirmInput.value = ''; confirmDeleteDataBtn.disabled = true; deleteDataConfirmModal.classList.add('hidden'); };
+    const closeTaskModal = () => { if (taskModal) taskModal.classList.add('hidden'); originalTaskDate = null; };
+    const showDeleteConfirmModal = (taskId) => { taskIdToDelete = taskId; if (deleteConfirmModal) deleteConfirmModal.classList.remove('hidden'); };
+    const hideDeleteConfirmModal = () => { if (deleteConfirmModal) deleteConfirmModal.classList.add('hidden'); taskIdToDelete = null; };
+    const showCompleteConfirmModal = (taskId) => { taskIdToComplete = taskId; if (completeConfirmModal) completeConfirmModal.classList.remove('hidden'); };
+    const hideCompleteConfirmModal = () => { if (completeConfirmModal) completeConfirmModal.classList.add('hidden'); taskIdToComplete = null; };
+    const openSettingsModal = () => { if (settingsModal) settingsModal.classList.remove('hidden'); };
+    const closeSettingsModal = () => { if (settingsModal) settingsModal.classList.add('hidden'); };
+    const openAnalysisModal = () => { calculateAndDisplayStats(); if (analysisModal) analysisModal.classList.remove('hidden'); };
+    const closeAnalysisModal = () => { if (analysisModal) analysisModal.classList.add('hidden'); };
+    const openDeleteDataModal = () => { if (deleteDataConfirmModal) deleteDataConfirmModal.classList.remove('hidden'); };
+    const closeDeleteDataModal = () => { if (deleteConfirmInput) deleteConfirmInput.value = ''; if (confirmDeleteDataBtn) confirmDeleteDataBtn.disabled = true; if (deleteDataConfirmModal) deleteDataConfirmModal.classList.add('hidden'); };
     const openJumpToDateModal = () => {
+        if (!jumpMonthSelect || !jumpDaySelect || !jumpYearInput || !jumpToDateModal) return;
         if (jumpMonthSelect.children.length === 0) {
             const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             months.forEach((month, index) => jumpMonthSelect.insertAdjacentHTML('beforeend', `<option value="${index}">${month}</option>`));
@@ -452,111 +472,117 @@ document.addEventListener('DOMContentLoaded', () => {
         jumpYearInput.value = currentDate.getFullYear();
         jumpToDateModal.classList.remove('hidden');
     };
-    const closeJumpToDateModal = () => jumpToDateModal.classList.add('hidden');
+    const closeJumpToDateModal = () => { if (jumpToDateModal) jumpToDateModal.classList.add('hidden'); };
 
-    // --- Event Handlers ---
-    authBtn.addEventListener('click', handleAuth);
-    authToggleLink.addEventListener('click', (e) => { e.preventDefault(); toggleAuthMode(); });
-    logoutBtn.addEventListener('click', logout);
-    mainApp.addEventListener('click', () => { if (document.body.classList.contains('side-menu-active')) closeMenu(); });
-    closeMenuBtn.addEventListener('click', closeMenu);
-    menuBtn.addEventListener('click', (e) => { e.stopPropagation(); openMenu(); });
-    searchBar.addEventListener('input', (e) => {
+    // --- Event Handlers (with safety checks) ---
+    if (menuBtn) menuBtn.addEventListener('click', (e) => { e.stopPropagation(); openMenu(); });
+    if (closeMenuBtn) closeMenuBtn.addEventListener('click', closeMenu);
+    if (mainApp) mainApp.addEventListener('click', () => { if (body && body.classList.contains('side-menu-active')) closeMenu(); });
+    if (authBtn) authBtn.addEventListener('click', handleAuth);
+    if (authToggleLink) authToggleLink.addEventListener('click', (e) => { e.preventDefault(); toggleAuthMode(); });
+    if (logoutBtn) logoutBtn.addEventListener('click', logout);
+    if (searchBar) searchBar.addEventListener('input', (e) => {
         const query = e.target.value.toLowerCase().trim();
         if (query === '') {
             updateUIForNewDate();
             return;
         }
-        document.getElementById('selected-date-display').classList.add('hidden');
-        document.querySelector('.calendar-container').classList.add('hidden');
+        if (selectedDateDisplay) selectedDateDisplay.classList.add('hidden');
+        const calContainer = document.querySelector('.calendar-container');
+        if (calContainer) calContainer.classList.add('hidden');
+
         const allTasks = [];
-        for (const dateKey in tasks) {
-            tasks[dateKey].forEach(task => allTasks.push({ ...task, date: dateKey }));
-        }
+        for (const dateKey in tasks) { tasks[dateKey].forEach(task => allTasks.push({ ...task, date: dateKey })); }
         const results = allTasks.filter(task => task.title.toLowerCase().includes(query) || task.description.toLowerCase().includes(query));
         renderSearchResults(results, query);
     });
-    themeToggle.addEventListener('click', () => {
+    if (themeToggle) themeToggle.addEventListener('click', () => {
         settings.theme = themeToggle.checked ? 'dark' : 'light';
-        applyTheme(settings.theme); 
-        localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
+        applyTheme(settings.theme);
+        if (currentUser) localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
         saveSettingsToServer();
-        themeSelector.querySelector('.active')?.classList.remove('active');
-        document.querySelector(`#theme-selector button[value="${settings.theme}"]`)?.classList.add('active');
+        if (themeSelector) {
+            themeSelector.querySelector('.active')?.classList.remove('active');
+            const activeBtn = themeSelector.querySelector(`button[value="${settings.theme}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+        }
     });
-    mottoInput.addEventListener('change', saveMotto);
-    addTaskBtn.addEventListener('click', () => {
-        if (!currentUser) return alert('Please log in to add tasks.');
-        openTaskModal();
+    if (mottoInput) mottoInput.addEventListener('change', saveMotto);
+    if (addTaskBtn) addTaskBtn.addEventListener('click', () => { if (!currentUser) { alert('Please log in to add tasks.'); return; } openTaskModal(); });
+    if (openSettingsBtn) openSettingsBtn.addEventListener('click', openSettingsModal);
+    if (openAnalysisBtn) openAnalysisBtn.addEventListener('click', openAnalysisModal);
+    if (prevMonthBtn) prevMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); updateUIForNewDate(); });
+    if (nextMonthBtn) nextMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); updateUIForNewDate(); });
+    if (todayBtn) todayBtn.addEventListener('click', () => { currentDate = new Date(); updateUIForNewDate(); });
+    if (toggleCalendarBtn) toggleCalendarBtn.addEventListener('click', () => {
+        if (calendarBody) calendarBody.classList.toggle('collapsed');
+        const icon = toggleCalendarBtn.querySelector('i');
+        if (icon) {
+            icon.classList.toggle('fa-chevron-up');
+            icon.classList.toggle('fa-chevron-down');
+        }
     });
-    openSettingsBtn.addEventListener('click', openSettingsModal);
-    openAnalysisBtn.addEventListener('click', openAnalysisModal);
-    prevMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); updateUIForNewDate(); });
-    nextMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); updateUIForNewDate(); });
-    todayBtn.addEventListener('click', () => { currentDate = new Date(); updateUIForNewDate(); });
-    toggleCalendarBtn.addEventListener('click', () => {
-        calendarBody.classList.toggle('collapsed');
-        toggleCalendarBtn.querySelector('i').classList.toggle('fa-chevron-up');
-        toggleCalendarBtn.querySelector('i').classList.toggle('fa-chevron-down');
-    });
-    calendarDaysGrid.addEventListener('click', (e) => {
+    if (calendarDaysGrid) calendarDaysGrid.addEventListener('click', (e) => {
         const target = e.target.closest('.calendar-day');
         if (target && !target.classList.contains('not-current-month')) {
             currentDate.setDate(parseInt(target.textContent, 10));
             updateUIForNewDate();
         }
     });
-    jumpToDateBtn.addEventListener('click', openJumpToDateModal);
-    cancelJumpBtn.addEventListener('click', closeJumpToDateModal);
-    goToDateBtn.addEventListener('click', () => {
+    if (jumpToDateBtn) jumpToDateBtn.addEventListener('click', openJumpToDateModal);
+    if (cancelJumpBtn) cancelJumpBtn.addEventListener('click', closeJumpToDateModal);
+    if (goToDateBtn) goToDateBtn.addEventListener('click', () => {
+        if (!jumpYearInput || !jumpMonthSelect || !jumpDaySelect) return;
         const year = parseInt(jumpYearInput.value, 10);
         if (!isNaN(year) && year > 1000 && year < 9999) {
             currentDate = new Date(year, parseInt(jumpMonthSelect.value, 10), parseInt(jumpDaySelect.value, 10));
-            updateUIForNewDate(); closeJumpToDateModal();
-        } else { alert("Please enter a valid year."); }
+            updateUIForNewDate();
+            closeJumpToDateModal();
+        } else {
+            alert("Please enter a valid year.");
+        }
     });
-    cancelBtn.addEventListener('click', closeTaskModal);
-    cancelDeleteBtn.addEventListener('click', hideDeleteConfirmModal);
-    cancelCompleteBtn.addEventListener('click', hideCompleteConfirmModal);
-    taskForm.addEventListener('submit', async (e) => {
+    if (cancelBtn) cancelBtn.addEventListener('click', closeTaskModal);
+    if (cancelDeleteBtn) cancelDeleteBtn.addEventListener('click', hideDeleteConfirmModal);
+    if (cancelCompleteBtn) cancelCompleteBtn.addEventListener('click', hideCompleteConfirmModal);
+    if (taskForm) taskForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!currentUser) return alert('Please log in to save tasks.');
 
         const taskData = {
-            title: document.getElementById('task-title').value,
-            description: document.getElementById('task-description').value,
-            priority: document.getElementById('task-priority').value
+            title: getEl('task-title').value,
+            description: getEl('task-description').value,
+            priority: getEl('task-priority').value
         };
 
         if (currentTaskId) {
-            const newDate = editTaskDateInput.value;
+            const newDate = getEl('edit-task-date').value;
             await fetch(`/api/tasks/${currentUser}/${currentTaskId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...taskData, date: newDate })
             });
         } else {
-            const selectedDate = datePicker.value;
+            const selectedDate = getEl('date-picker').value;
             await fetch(`/api/tasks/${currentUser}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...taskData, date: selectedDate })
             });
         }
-        
         await loadTasksForCurrentUser();
         closeTaskModal();
         updateUIForNewDate();
     });
-    confirmDeleteBtn.addEventListener('click', async () => {
-        if (!currentUser) return;
+    if (confirmDeleteBtn) confirmDeleteBtn.addEventListener('click', async () => {
+        if (!currentUser || !taskIdToDelete) return;
         await fetch(`/api/tasks/${currentUser}/${taskIdToDelete}`, { method: 'DELETE' });
         await loadTasksForCurrentUser();
         hideDeleteConfirmModal();
         updateUIForNewDate();
     });
-    confirmCompleteBtn.addEventListener('click', async () => {
-        if (!currentUser) return;
+    if (confirmCompleteBtn) confirmCompleteBtn.addEventListener('click', async () => {
+        if (!currentUser || !taskIdToComplete) return;
         await fetch(`/api/tasks/${currentUser}/${taskIdToComplete}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -566,104 +592,123 @@ document.addEventListener('DOMContentLoaded', () => {
         hideCompleteConfirmModal();
         updateUIForNewDate();
     });
-    closeSettingsBtn.addEventListener('click', closeSettingsModal);
-    closeAnalysisBtn.addEventListener('click', closeAnalysisModal);
-
-    // --- REVISED SETTINGS EVENT LISTENERS ---
-    enableNotificationsToggle.addEventListener('change', (e) => { 
-        settings.notificationsEnabled = e.target.checked; 
-        localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
+    if (closeSettingsBtn) closeSettingsBtn.addEventListener('click', closeSettingsModal);
+    if (closeAnalysisBtn) closeAnalysisBtn.addEventListener('click', closeAnalysisModal);
+    if (enableNotificationsToggle) enableNotificationsToggle.addEventListener('change', (e) => {
+        settings.notificationsEnabled = e.target.checked;
+        if (currentUser) localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
         saveSettingsToServer();
     });
-    dailySummaryToggle.addEventListener('change', (e) => { 
-        settings.dailySummaryEnabled = e.target.checked; 
-        dailySummaryTimeContainer.classList.toggle('hidden', !e.target.checked); 
-        localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
+    if (dailySummaryToggle) dailySummaryToggle.addEventListener('change', (e) => {
+        settings.dailySummaryEnabled = e.target.checked;
+        if (dailySummaryTimeContainer) dailySummaryTimeContainer.classList.toggle('hidden', !e.target.checked);
+        if (currentUser) localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
         saveSettingsToServer();
     });
-    dailySummaryTimeInput.addEventListener('change', (e) => { 
-        settings.dailySummaryTime = e.target.value; 
-        localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
+    if (dailySummaryTimeInput) dailySummaryTimeInput.addEventListener('change', (e) => {
+        settings.dailySummaryTime = e.target.value;
+        if (currentUser) localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
         saveSettingsToServer();
     });
-    hourlyReminderToggle.addEventListener('change', (e) => { 
-        settings.hourlyReminderEnabled = e.target.checked; 
-        localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
+    if (hourlyReminderToggle) hourlyReminderToggle.addEventListener('change', (e) => {
+        settings.hourlyReminderEnabled = e.target.checked;
+        if (currentUser) localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
         saveSettingsToServer();
     });
-    themeSelector.addEventListener('click', (e) => {
-        if (e.target.tagName === 'BUTTON') {
-            themeSelector.querySelector('.active').classList.remove('active');
-            e.target.classList.add('active');
-            settings.theme = e.target.value;
-            applyTheme(settings.theme); 
-            localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
+    if (themeSelector) themeSelector.addEventListener('click', (e) => {
+        const button = e.target.closest('button');
+        if (button) {
+            const activeBtn = themeSelector.querySelector('.active');
+            if(activeBtn) activeBtn.classList.remove('active');
+            button.classList.add('active');
+            settings.theme = button.value;
+            applyTheme(settings.theme);
+            if (currentUser) localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
             saveSettingsToServer();
         }
     });
-    accentColorSelector.addEventListener('click', (e) => {
-        if (e.target.classList.contains('color-swatch')) {
-            accentColorSelector.querySelector('.active').classList.remove('active');
-            e.target.classList.add('active');
-            settings.accentColor = e.target.dataset.color;
-            applyAccentColor(settings.accentColor); 
-            localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
+    if (accentColorSelector) accentColorSelector.addEventListener('click', (e) => {
+        const swatch = e.target.closest('.color-swatch');
+        if (swatch) {
+            const activeSwatch = accentColorSelector.querySelector('.active');
+            if (activeSwatch) activeSwatch.classList.remove('active');
+            swatch.classList.add('active');
+            settings.accentColor = swatch.dataset.color;
+            applyAccentColor(settings.accentColor);
+            if (currentUser) localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
             saveSettingsToServer();
         }
     });
-    fontSizeSelector.addEventListener('click', (e) => {
-        if (e.target.tagName === 'BUTTON') {
-            fontSizeSelector.querySelector('.active').classList.remove('active');
-            e.target.classList.add('active');
-            settings.fontSize = e.target.value;
-            applyFontSize(settings.fontSize); 
-            localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
+    if (fontSizeSelector) fontSizeSelector.addEventListener('click', (e) => {
+        const button = e.target.closest('button');
+        if (button) {
+            const activeBtn = fontSizeSelector.querySelector('.active');
+            if (activeBtn) activeBtn.classList.remove('active');
+            button.classList.add('active');
+            settings.fontSize = button.value;
+            applyFontSize(settings.fontSize);
+            if (currentUser) localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
             saveSettingsToServer();
         }
     });
-
-    deleteAllDataBtn.addEventListener('click', openDeleteDataModal);
-    cancelDeleteDataBtn.addEventListener('click', closeDeleteDataModal);
-    deleteConfirmInput.addEventListener('input', (e) => { confirmDeleteDataBtn.disabled = e.target.value !== 'DELETE'; });
-    confirmDeleteDataBtn.addEventListener('click', async () => {
+    if (deleteAllDataBtn) deleteAllDataBtn.addEventListener('click', openDeleteDataModal);
+    if (cancelDeleteDataBtn) cancelDeleteDataBtn.addEventListener('click', closeDeleteDataModal);
+    if (deleteConfirmInput) deleteConfirmInput.addEventListener('input', (e) => { if (confirmDeleteDataBtn) confirmDeleteDataBtn.disabled = e.target.value !== 'DELETE'; });
+    if (confirmDeleteDataBtn) confirmDeleteDataBtn.addEventListener('click', async () => {
         if (!currentUser) return;
-        await fetch(`/api/tasks/${currentUser}/all`, { method: 'DELETE' }); // Assumes a route to delete all tasks exists
+        // In a real app, we'd send one request to a new route like /api/tasks/:username/all
+        // This is a placeholder for that functionality
+        console.log("Deleting all data...");
+        // This should be replaced with a single API call to the backend
+        const allTaskIds = [];
+        for (const date in tasks) {
+            tasks[date].forEach(task => allTaskIds.push(task.id));
+        }
+        await Promise.all(allTaskIds.map(id => 
+            fetch(`/api/tasks/${currentUser}/${id}`, { method: 'DELETE' })
+        ));
         tasks = {};
         closeDeleteDataModal();
         updateUIForNewDate();
     });
-
+    
     // --- Drag/Drop & Swipe Handlers ---
-    let draggedItem = null;
-    taskList.addEventListener('dragstart', (e) => { if (e.target.classList.contains('task-item')) { draggedItem = e.target; setTimeout(() => e.target.classList.add('dragging'), 0); } });
-    taskList.addEventListener('dragend', () => { if (draggedItem) { draggedItem.classList.remove('dragging'); draggedItem = null; } });
-    taskList.addEventListener('dragover', (e) => { e.preventDefault(); const afterElement = getDragAfterElement(taskList, e.clientY); if (draggedItem) { if (afterElement == null) taskList.appendChild(draggedItem); else taskList.insertBefore(draggedItem, afterElement); } });
-    function getDragAfterElement(container, y) { const draggableElements = [...container.querySelectorAll('.task-item:not(.dragging)')]; return draggableElements.reduce((closest, child) => { const box = child.getBoundingClientRect(); const offset = y - box.top - box.height / 2; if (offset < 0 && offset > closest.offset) return { offset: offset, element: child }; else return closest; }, { offset: Number.NEGATIVE_INFINITY }).element; }
     function addSwipeAndDragListeners(element) {
-        let isDragging = false, startX, diff = 0;
+        let isDragging = false, startX, currentX, diff = 0;
         const getClientX = (e) => e.touches ? e.touches[0].clientX : e.clientX;
         const dragStart = (e) => { startX = getClientX(e); isDragging = true; element.style.transition = ''; };
-        const dragMove = (e) => { if (!isDragging || element.classList.contains('dragging')) return; diff = currentX - startX; element.style.transform = `translateX(${diff}px)`; };
+        const dragMove = (e) => { 
+            if (!isDragging || element.classList.contains('dragging')) return;
+            currentX = getClientX(e);
+            diff = currentX - startX;
+            if (Math.abs(diff) > 10) element.style.transform = `translateX(${diff}px)`;
+        };
         const dragEnd = () => {
             if (!isDragging) return; isDragging = false; element.style.transition = 'transform 0.3s ease';
             if (diff > 100) showCompleteConfirmModal(element.dataset.id);
             else if (diff < -100) showDeleteConfirmModal(element.dataset.id);
             element.style.transform = 'translateX(0)'; diff = 0;
         };
-        element.addEventListener('touchstart', dragStart); element.addEventListener('touchmove', dragMove); element.addEventListener('touchend', dragEnd);
-        element.addEventListener('mousedown', dragStart); element.addEventListener('mousemove', dragMove); element.addEventListener('mouseup', dragEnd);
-        element.addEventListener('mouseleave', () => { if(isDragging) dragEnd(); });
+        element.addEventListener('touchstart', dragStart);
+        element.addEventListener('touchmove', dragMove);
+        element.addEventListener('touchend', dragEnd);
+        element.addEventListener('mousedown', dragStart);
+        element.addEventListener('mousemove', dragMove);
+        element.addEventListener('mouseup', dragEnd);
+        element.addEventListener('mouseleave', () => { if (isDragging) dragEnd(); });
     }
 
     // --- Initial App Setup ---
     const initializeApp = async () => {
+        console.log("Nextly App Initializing...");
         const savedUser = localStorage.getItem('nextlyUser');
         if (savedUser) {
             await login(savedUser);
         } else {
-            body.classList.remove('logged-in');
-            await loadAllUserData(); // Load default view
+            if (body) body.classList.remove('logged-in');
+            await loadAllUserData();
         }
+        console.log("Initialization Complete.");
     };
 
     initializeApp();
