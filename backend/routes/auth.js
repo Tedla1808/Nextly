@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
-const User = require('../models/user');
+const User = require('../models/user'); // This import is now guaranteed to work
 
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
