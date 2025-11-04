@@ -75,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const completionRateEl = getEl('completion-rate');
     const productivityChartCanvas = getEl('productivity-chart');
     const themeToggle = getEl('theme-toggle');
+    const calendarTypeSelector = getEl('calendar-type-selector'); // New element reference
 
     // --- State Management ---
     let tasks = {};
@@ -96,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
         theme: "system",
         accentColor: "blue",
         fontSize: "medium",
+        calendarType: 'gregorian', // New setting
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
     };
 
@@ -241,6 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dailySummaryTimeInput) dailySummaryTimeInput.value = settings.dailySummaryTime;
         if (dailySummaryTimeContainer) dailySummaryTimeContainer.classList.toggle('hidden', !settings.dailySummaryEnabled);
         if (hourlyReminderToggle) hourlyReminderToggle.checked = settings.hourlyReminderEnabled;
+        if (calendarTypeSelector) calendarTypeSelector.value = settings.calendarType; // Update calendar dropdown
 
         if (themeSelector) {
             themeSelector.querySelectorAll('.active').forEach(b => b.classList.remove('active'));
@@ -322,38 +325,88 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- Calendar & Task Functions ---
+    // --- MAJOR CHANGE: `generateCalendar` is now calendar-aware ---
     const generateCalendar = (date) => {
         if (!calendarDaysGrid || !monthYearHeader) return;
         calendarDaysGrid.innerHTML = '';
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const month = date.getMonth(), year = date.getFullYear();
-        monthYearHeader.textContent = `${date.toLocaleString('default', { month: 'long' })} ${year}`;
-        const firstDayOfMonth = new Date(year, month, 1);
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const startingDayOfWeek = firstDayOfMonth.getDay();
-        for (let i = 0; i < startingDayOfWeek; i++) calendarDaysGrid.insertAdjacentHTML('beforeend', `<div class="calendar-day not-current-month"></div>`);
-        for (let i = 1; i <= daysInMonth; i++) {
-            const dayCell = document.createElement('div');
-            dayCell.className = 'calendar-day';
-            dayCell.textContent = i;
-            const cellDate = new Date(year, month, i);
-            const formattedCellDate = formatDate(cellDate);
-            dayCell.dataset.date = formattedCellDate;
-            if (today.getTime() === cellDate.getTime()) dayCell.classList.add('current-day');
-            if (tasks[formattedCellDate]?.some(t => !t.completed)) dayCell.classList.add('day-with-task');
-            if (formatDate(currentDate) === formattedCellDate) dayCell.classList.add('selected-day');
-            calendarDaysGrid.appendChild(dayCell);
+
+        // Gregorian Calendar Logic (Original)
+        if (settings.calendarType === 'gregorian') {
+            const month = date.getMonth(), year = date.getFullYear();
+            monthYearHeader.textContent = `${date.toLocaleString('default', { month: 'long' })} ${year}`;
+            const firstDayOfMonth = new Date(year, month, 1);
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const startingDayOfWeek = firstDayOfMonth.getDay();
+            
+            for (let i = 0; i < startingDayOfWeek; i++) calendarDaysGrid.insertAdjacentHTML('beforeend', `<div class="calendar-day not-current-month"></div>`);
+            
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayCell = document.createElement('div');
+                dayCell.className = 'calendar-day';
+                dayCell.textContent = i;
+                const cellDate = new Date(year, month, i);
+                const formattedCellDate = formatDate(cellDate);
+                dayCell.dataset.date = formattedCellDate;
+                if (today.getTime() === cellDate.getTime()) dayCell.classList.add('current-day');
+                if (tasks[formattedCellDate]?.some(t => !t.completed)) dayCell.classList.add('day-with-task');
+                if (formatDate(currentDate) === formattedCellDate) dayCell.classList.add('selected-day');
+                calendarDaysGrid.appendChild(dayCell);
+            }
+        } 
+        // Ethiopian Calendar Logic (New)
+        else {
+            const [ethYear, ethMonth, ethDay] = EthiopianDate.toEthiopian(date.getFullYear(), date.getMonth() + 1, date.getDate());
+            const ethMonthName = EthiopianDate.monthNames[ethMonth - 1];
+            monthYearHeader.textContent = `${ethMonthName} ${ethYear}`;
+            
+            const firstDayOfEthMonthInGregorian = EthiopianDate.toGregorian(ethYear, ethMonth, 1);
+            const firstDay = new Date(firstDayOfEthMonthInGregorian.year, firstDayOfEthMonthInGregorian.month - 1, firstDayOfEthMonthInGregorian.day);
+            const startingDayOfWeek = firstDay.getDay();
+            const daysInMonth = (ethMonth === 13) ? (EthiopianDate.isLeap(ethYear) ? 6 : 5) : 30;
+
+            for (let i = 0; i < startingDayOfWeek; i++) calendarDaysGrid.insertAdjacentHTML('beforeend', `<div class="calendar-day not-current-month"></div>`);
+            
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayCell = document.createElement('div');
+                dayCell.className = 'calendar-day';
+                dayCell.textContent = i;
+                
+                const dayGregorian = EthiopianDate.toGregorian(ethYear, ethMonth, i);
+                const cellDate = new Date(dayGregorian.year, dayGregorian.month - 1, dayGregorian.day);
+                const formattedCellDate = formatDate(cellDate);
+                dayCell.dataset.date = formattedCellDate;
+
+                const [todayEthYear, todayEthMonth, todayEthDay] = EthiopianDate.toEthiopian(today.getFullYear(), today.getMonth() + 1, today.getDate());
+                if (todayEthYear === ethYear && todayEthMonth === ethMonth && todayEthDay === i) dayCell.classList.add('current-day');
+                if (tasks[formattedCellDate]?.some(t => !t.completed)) dayCell.classList.add('day-with-task');
+                if (ethYear === ethYear && ethMonth === ethMonth && i === ethDay) dayCell.classList.add('selected-day');
+                calendarDaysGrid.appendChild(dayCell);
+            }
         }
     };
+
     const updateUIForNewDate = () => {
         currentDate.setHours(0, 0, 0, 0);
         if (datePicker) datePicker.value = formatDate(currentDate);
-        if (selectedDateDisplay) selectedDateDisplay.textContent = currentDate.toLocaleDateString('default', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        
+        if (selectedDateDisplay) {
+            if (settings.calendarType === 'gregorian') {
+                selectedDateDisplay.textContent = currentDate.toLocaleDateString('default', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            } else {
+                const [ethYear, ethMonth, ethDay] = EthiopianDate.toEthiopian(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate());
+                const ethMonthName = EthiopianDate.monthNames[ethMonth - 1];
+                const ethWeekdayName = EthiopianDate.weekDayNames[(currentDate.getDay() + 1) % 7]; // Adjust weekday index
+                selectedDateDisplay.textContent = `${ethWeekdayName}, ${ethMonthName} ${ethDay}, ${ethYear}`;
+            }
+        }
+        
         if (searchBar) searchBar.value = '';
         if (selectedDateDisplay) selectedDateDisplay.classList.remove('hidden');
         const calContainer = document.querySelector('.calendar-container');
         if (calContainer) calContainer.classList.remove('hidden');
+        
         generateCalendar(currentDate);
         renderTasks();
     };
@@ -476,6 +529,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Event Handlers (with safety checks) ---
     if (menuBtn) menuBtn.addEventListener('click', (e) => { e.stopPropagation(); openMenu(); });
+    if (calendarTypeSelector) {
+        calendarTypeSelector.addEventListener('change', (e) => {
+            settings.calendarType = e.target.value;
+            if (currentUser) localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings));
+            saveSettingsToServer();
+            // Redraw the UI with the new calendar
+            updateUIForNewDate();
+        });
+    }
     if (closeMenuBtn) closeMenuBtn.addEventListener('click', closeMenu);
     if (mainApp) mainApp.addEventListener('click', () => { if (body && body.classList.contains('side-menu-active')) closeMenu(); });
     if (authBtn) authBtn.addEventListener('click', handleAuth);

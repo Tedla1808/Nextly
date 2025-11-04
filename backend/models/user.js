@@ -19,7 +19,8 @@ const userSchema = new mongoose.Schema({
         dailySummaryEnabled: { type: Boolean, default: false },
         dailySummaryTime: { type: String, default: '08:00' },
         timezone: { type: String, default: 'UTC' },
-        lastAdvancedReminderDate: { type: String, default: null }
+        lastAdvancedReminderDate: { type: String, default: null },
+        calendarType: { type: String, default: 'gregorian' } // 'gregorian' or 'ethiopian'
     }
 });
 

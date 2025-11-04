@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <!-- Include Chart.js library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- ADD THIS SCRIPT FOR ETHIOPIAN CALENDAR CONVERSION -->
+    <script src="https://cdn.jsdelivr.net/npm/ethiopian-date/dist/ethiopian-date.min.js"></script>
 </head>
 <body data-theme="system" data-accent-color="blue" data-font-size="medium">
     <!-- Side Navigation Menu -->
@@ -213,6 +215,15 @@
                         <button value="system">System</button>
                     </div>
                 </div>
+                
+                <div class="setting-item">
+                    <label for="calendar-type-selector">Calendar System</label>
+                    <select id="calendar-type-selector">
+                        <option value="gregorian">Gregorian Calendar</option>
+                        <option value="ethiopian">Ethiopian Calendar</option>
+                    </select>
+                </div>
+
                 <div class="setting-item">
                     <label>Accent Color</label>
                     <div class="color-swatch-container" id="accent-color-selector">
