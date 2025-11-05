@@ -1,14 +1,51 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- Element References ---
     const getEl = (id) => document.getElementById(id);
-    const menuBtn = getEl('menu-btn'), closeMenuBtn = getEl('close-menu-btn'), mottoInput = getEl('motto-input'), taskList = getEl('task-list'), emptyState = getEl('empty-state'), addTaskBtn = getEl('add-task-btn'), openSettingsBtn = getEl('open-settings-btn'), openAnalysisBtn = getEl('open-analysis-btn'), searchBar = getEl('search-bar'), loginView = getEl('login-view'), usernameInput = getEl('username-input'), passwordInput = getEl('password-input'), authTitle = getEl('auth-title'), authBtn = getEl('auth-btn'), authToggleLink = getEl('auth-toggle-link'), profileView = getEl('profile-view'), currentUserDisplay = getEl('current-user-display'), logoutBtn = getEl('logout-btn'), mainApp = getEl('main-app'), body = document.body, monthYearHeader = getEl('month-year-header'), calendarDaysGrid = getEl('calendar-days-grid'), prevMonthBtn = getEl('prev-month-btn'), nextMonthBtn = getEl('next-month-btn'), todayBtn = getEl('today-btn'), jumpToDateBtn = getEl('jump-to-date-btn'), toggleCalendarBtn = getEl('toggle-calendar-btn'), calendarBody = getEl('calendar-body'), selectedDateDisplay = getEl('selected-date-display'), datePicker = getEl('date-picker'), taskModal = getEl('task-modal'), modalTitle = getEl('modal-title'), taskForm = getEl('task-form'), cancelBtn = getEl('cancel-btn'), editTaskDateContainer = getEl('edit-task-date-container'), editTaskDateInput = getEl('edit-task-date'), deleteConfirmModal = getEl('delete-confirm-modal'), cancelDeleteBtn = getEl('cancel-delete-btn'), confirmDeleteBtn = getEl('confirm-delete-btn'), completeConfirmModal = getEl('complete-confirm-modal'), cancelCompleteBtn = getEl('cancel-complete-btn'), confirmCompleteBtn = getEl('confirm-complete-btn'), jumpToDateModal = getEl('jump-to-date-modal'), jumpMonthSelect = getEl('jump-month'), jumpDaySelect = getEl('jump-day'), jumpYearInput = getEl('jump-year'), cancelJumpBtn = getEl('cancel-jump-btn'), goToDateBtn = getEl('go-to-date-btn'), settingsModal = getEl('settings-modal'), closeSettingsBtn = getEl('close-settings-btn'), enableNotificationsToggle = getEl('enable-notifications'), hourlyReminderToggle = getEl('hourly-reminder'), dailySummaryToggle = getEl('daily-summary'), dailySummaryTimeContainer = getEl('daily-summary-time-container'), dailySummaryTimeInput = getEl('daily-summary-time'), themeSelector = getEl('theme-selector'), accentColorSelector = getEl('accent-color-selector'), fontSizeSelector = getEl('font-size-selector'), deleteAllDataBtn = getEl('delete-all-data-btn'), deleteDataConfirmModal = getEl('delete-data-confirm-modal'), cancelDeleteDataBtn = getEl('cancel-delete-data-btn'), confirmDeleteDataBtn = getEl('confirm-delete-data-btn'), deleteConfirmInput = getEl('delete-confirm-input'), analysisModal = getEl('analysis-modal'), closeAnalysisBtn = getEl('close-analysis-btn'), completedCountEl = getEl('completed-count'), overdueCountEl = getEl('overdue-count'), totalCountEl = getEl('total-count'), completionRateEl = getEl('completion-rate'), productivityChartCanvas = getEl('productivity-chart'), themeToggle = getEl('theme-toggle');
-    const calendarChoiceModal = getEl('calendar-choice-modal'), chooseEthiopianBtn = getEl('choose-ethiopian-btn'), chooseGregorianBtn = getEl('choose-gregorian-btn');
+    const mainApp = getEl('main-app');
+    const calendarChoiceModal = getEl('calendar-choice-modal');
+    const chooseEthiopianBtn = getEl('choose-ethiopian-btn');
+    const chooseGregorianBtn = getEl('choose-gregorian-btn');
+    // (All other element references are the same)
+    const menuBtn = getEl('menu-btn'), closeMenuBtn = getEl('close-menu-btn'), mottoInput = getEl('motto-input'), taskList = getEl('task-list'), emptyState = getEl('empty-state'), addTaskBtn = getEl('add-task-btn'), openSettingsBtn = getEl('open-settings-btn'), openAnalysisBtn = getEl('open-analysis-btn'), searchBar = getEl('search-bar'), loginView = getEl('login-view'), usernameInput = getEl('username-input'), passwordInput = getEl('password-input'), authTitle = getEl('auth-title'), authBtn = getEl('auth-btn'), authToggleLink = getEl('auth-toggle-link'), profileView = getEl('profile-view'), currentUserDisplay = getEl('current-user-display'), logoutBtn = getEl('logout-btn'), body = document.body, monthYearHeader = getEl('month-year-header'), calendarDaysGrid = getEl('calendar-days-grid'), prevMonthBtn = getEl('prev-month-btn'), nextMonthBtn = getEl('next-month-btn'), todayBtn = getEl('today-btn'), jumpToDateBtn = getEl('jump-to-date-btn'), toggleCalendarBtn = getEl('toggle-calendar-btn'), calendarBody = getEl('calendar-body'), selectedDateDisplay = getEl('selected-date-display'), datePicker = getEl('date-picker'), taskModal = getEl('task-modal'), modalTitle = getEl('modal-title'), taskForm = getEl('task-form'), cancelBtn = getEl('cancel-btn'), editTaskDateContainer = getEl('edit-task-date-container'), editTaskDateInput = getEl('edit-task-date'), deleteConfirmModal = getEl('delete-confirm-modal'), cancelDeleteBtn = getEl('cancel-delete-btn'), confirmDeleteBtn = getEl('confirm-delete-btn'), completeConfirmModal = getEl('complete-confirm-modal'), cancelCompleteBtn = getEl('cancel-complete-btn'), confirmCompleteBtn = getEl('confirm-complete-btn'), jumpToDateModal = getEl('jump-to-date-modal'), jumpMonthSelect = getEl('jump-month'), jumpDaySelect = getEl('jump-day'), jumpYearInput = getEl('jump-year'), cancelJumpBtn = getEl('cancel-jump-btn'), goToDateBtn = getEl('go-to-date-btn'), settingsModal = getEl('settings-modal'), closeSettingsBtn = getEl('close-settings-btn'), enableNotificationsToggle = getEl('enable-notifications'), hourlyReminderToggle = getEl('hourly-reminder'), dailySummaryToggle = getEl('daily-summary'), dailySummaryTimeContainer = getEl('daily-summary-time-container'), dailySummaryTimeInput = getEl('daily-summary-time'), themeSelector = getEl('theme-selector'), accentColorSelector = getEl('accent-color-selector'), fontSizeSelector = getEl('font-size-selector'), deleteAllDataBtn = getEl('delete-all-data-btn'), deleteDataConfirmModal = getEl('delete-data-confirm-modal'), cancelDeleteDataBtn = getEl('cancel-delete-data-btn'), confirmDeleteDataBtn = getEl('confirm-delete-data-btn'), deleteConfirmInput = getEl('delete-confirm-input'), analysisModal = getEl('analysis-modal'), closeAnalysisBtn = getEl('close-analysis-btn'), completedCountEl = getEl('completed-count'), overdueCountEl = getEl('overdue-count'), totalCountEl = getEl('total-count'), completionRateEl = getEl('completion-rate'), productivityChartCanvas = getEl('productivity-chart'), themeToggle = getEl('theme-toggle');
 
     let tasks = {}, currentDate = new Date(), currentTaskId = null, taskIdToDelete = null, taskIdToComplete = null, originalTaskDate = null, productivityChart = null, currentUser = null, isLoginMode = true, settings = {};
-    let calendarType = 'gregorian'; // This is now a global device setting
+    let calendarType = 'gregorian';
     const defaultSettings = { notificationsEnabled: true, dailySummaryEnabled: false, dailySummaryTime: "08:00", hourlyReminderEnabled: false, theme: "system", accentColor: "blue", fontSize: "medium", timezone: Intl.DateTimeFormat().resolvedOptions().timeZone };
 
     const formatDate = (date) => { const d = new Date(date); const year = d.getFullYear(); const month = ('0' + (d.getMonth() + 1)).slice(-2); const day = ('0' + d.getDate()).slice(-2); return `${year}-${month}-${day}`; };
+
+    // --- NEW, ROBUST INITIALIZATION LOGIC ---
+    const initializeApp = () => {
+        const savedCalendarType = localStorage.getItem('nextlyCalendarType');
+        if (!savedCalendarType) {
+            // First time user: show ONLY the choice modal
+            if (calendarChoiceModal) calendarChoiceModal.classList.remove('hidden');
+        } else {
+            // Returning user: hide the choice modal, show the main app, and continue
+            calendarType = savedCalendarType;
+            if (calendarChoiceModal) calendarChoiceModal.classList.add('hidden');
+            if (mainApp) mainApp.classList.remove('hidden');
+            continueInitialization();
+        }
+    };
+
+    const continueInitialization = async () => {
+        const savedUser = localStorage.getItem('nextlyUser');
+        if (savedUser) {
+            await login(savedUser);
+        } else {
+            body.classList.remove('logged-in');
+            await loadAllUserData();
+        }
+    };
+
+    const handleCalendarChoice = (choice) => {
+        calendarType = choice;
+        localStorage.setItem('nextlyCalendarType', calendarType);
+        if (calendarChoiceModal) calendarChoiceModal.classList.add('hidden');
+        if (mainApp) mainApp.classList.remove('hidden');
+        continueInitialization();
+    };
 
     const handleAuth = async () => { if (!usernameInput || !passwordInput) return; const username = usernameInput.value.trim().toLowerCase(); const password = passwordInput.value; if (!username || !password) return alert('Please enter both a username and password.'); const endpoint = isLoginMode ? '/api/auth/login' : '/api/auth/register'; try { const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) }); const data = await response.json(); if (!response.ok) throw new Error(data.message || 'An error occurred.'); if (isLoginMode) { await login(data.username); } else { alert(data.message); toggleAuthMode(); } } catch (error) { alert(error.message); } };
     const login = async (username) => { if (!username) return; currentUser = username; localStorage.setItem('nextlyUser', currentUser); body.classList.add('logged-in'); if (currentUserDisplay) currentUserDisplay.textContent = currentUser; if (loginView) loginView.classList.add('hidden'); if (profileView) profileView.classList.remove('hidden'); closeMenu(); if (typeof Android !== "undefined" && Android.registerFCMToken) { Android.registerFCMToken(currentUser); } await loadAllUserData(); await saveSettingsToServer(); };
@@ -18,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleAuthMode = () => { isLoginMode = !isLoginMode; if (authTitle) authTitle.textContent = isLoginMode ? 'Login' : 'Sign Up'; if (authBtn) authBtn.textContent = isLoginMode ? 'Login' : 'Sign Up'; if (authToggleLink) authToggleLink.textContent = isLoginMode ? "Don't have an account? Sign Up" : "Already have an account? Login"; if (passwordInput) passwordInput.value = ''; if (usernameInput) usernameInput.value = ''; };
     const saveMotto = () => { if (currentUser && mottoInput) localStorage.setItem(`userMotto_${currentUser}`, mottoInput.value); };
     const loadMotto = () => { if (mottoInput) mottoInput.value = currentUser ? localStorage.getItem(`userMotto_${currentUser}`) || "Your daily focus motto" : "Your daily focus motto"; };
-    const saveSettingsToServer = async () => { if (!currentUser) return; const settingsPayload = { ...settings }; try { await fetch(`/api/user/${currentUser}/settings`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(settingsPayload) }); console.log("Settings saved to server."); } catch (error) { console.error("Failed to save settings to server:", error); } };
+    const saveSettingsToServer = async () => { if (!currentUser) return; const settingsPayload = { ...settings, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone }; try { await fetch(`/api/user/${currentUser}/settings`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(settingsPayload) }); console.log("Settings saved to server."); } catch (error) { console.error("Failed to save settings to server:", error); } };
     const loadSettings = async () => { if (currentUser) { try { const response = await fetch(`/api/user/${currentUser}/settings`); if (!response.ok) throw new Error('Server responded with an error'); const serverSettings = await response.json(); settings = { ...defaultSettings, ...serverSettings }; } catch (error) { console.warn("Could not fetch settings from server, using local fallback.", error); const localSettings = JSON.parse(localStorage.getItem(`nextlySettings_${currentUser}`)); settings = { ...defaultSettings, ...localSettings }; } } else { settings = { ...defaultSettings }; } if (currentUser) localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings)); updateSettingsUI(); };
     const updateSettingsUI = () => { if (!settings) return; if (enableNotificationsToggle) enableNotificationsToggle.checked = settings.notificationsEnabled; if (dailySummaryToggle) dailySummaryToggle.checked = settings.dailySummaryEnabled; if (dailySummaryTimeInput) dailySummaryTimeInput.value = settings.dailySummaryTime; if (dailySummaryTimeContainer) dailySummaryTimeContainer.classList.toggle('hidden', !settings.dailySummaryEnabled); if (hourlyReminderToggle) hourlyReminderToggle.checked = settings.hourlyReminderEnabled; if (themeSelector) { const activeBtn = themeSelector.querySelector('.active'); if (activeBtn) activeBtn.classList.remove('active'); const newActiveBtn = themeSelector.querySelector(`button[value="${settings.theme}"]`); if (newActiveBtn) newActiveBtn.classList.add('active'); } if (accentColorSelector) { const activeSwatch = accentColorSelector.querySelector('.active'); if (activeSwatch) activeSwatch.classList.remove('active'); const newActiveSwatch = accentColorSelector.querySelector(`.color-swatch[data-color="${settings.accentColor}"]`); if (newActiveSwatch) newActiveSwatch.classList.add('active'); } if (fontSizeSelector) { const activeBtn = fontSizeSelector.querySelector('.active'); if (activeBtn) activeBtn.classList.remove('active'); const newActiveBtn = fontSizeSelector.querySelector(`button[value="${settings.fontSize}"]`); if (newActiveBtn) newActiveBtn.classList.add('active'); } applyTheme(settings.theme); applyAccentColor(settings.accentColor); applyFontSize(settings.fontSize); };
     const applyTheme = (theme) => { body.dataset.theme = theme; if (theme === 'system') { const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; body.classList.toggle('dark-theme', prefersDark); if (themeToggle) themeToggle.checked = prefersDark; } else { body.classList.toggle('dark-theme', theme === 'dark'); if (themeToggle) themeToggle.checked = theme === 'dark'; } };
@@ -87,35 +124,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (cancelDeleteDataBtn) cancelDeleteDataBtn.addEventListener('click', closeDeleteDataModal);
     if (deleteConfirmInput) deleteConfirmInput.addEventListener('input', (e) => { if (confirmDeleteDataBtn) confirmDeleteDataBtn.disabled = e.target.value !== 'DELETE'; });
     if (confirmDeleteDataBtn) confirmDeleteDataBtn.addEventListener('click', async () => { if (!currentUser) return; const allTaskIds = []; for (const date in tasks) { tasks[date].forEach(task => allTaskIds.push(task.id)); } await Promise.all(allTaskIds.map(id => fetch(`/api/tasks/${currentUser}/${id}`, { method: 'DELETE' }))); tasks = {}; closeDeleteDataModal(); updateUIForNewDate(); });
-    
-    const handleCalendarChoice = async (choice) => {
-        calendarType = choice;
-        localStorage.setItem('nextlyCalendarType', calendarType);
-        if (calendarChoiceModal) calendarChoiceModal.classList.add('hidden');
-        await continueInitialization();
-    };
     if (chooseEthiopianBtn) { chooseEthiopianBtn.addEventListener('click', () => handleCalendarChoice('ethiopian')); }
     if (chooseGregorianBtn) { chooseGregorianBtn.addEventListener('click', () => handleCalendarChoice('gregorian')); }
 
-    const continueInitialization = async () => {
-        const savedUser = localStorage.getItem('nextlyUser');
-        if (savedUser) {
-            await login(savedUser);
-        } else {
-            body.classList.remove('logged-in');
-            await loadAllUserData();
-        }
-    };
-
-    const initializeApp = () => {
-        const savedCalendarType = localStorage.getItem('nextlyCalendarType');
-        if (!savedCalendarType) {
-            if (calendarChoiceModal) calendarChoiceModal.classList.remove('hidden');
-        } else {
-            calendarType = savedCalendarType;
-            continueInitialization();
-        }
-    };
-    
     initializeApp();
 });

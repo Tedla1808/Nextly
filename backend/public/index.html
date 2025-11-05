@@ -51,8 +51,8 @@
         </div>
     </nav>
 
-    <!-- Main App Container -->
-    <div id="main-app">
+    <!-- Main App Container (Hidden by default) -->
+    <div id="main-app" class="hidden">
         <header>
             <button id="menu-btn" class="menu-icon"><i class="fas fa-bars"></i></button>
             <div class="header-title">
@@ -196,7 +196,7 @@
                     <label class="switch"><input type="checkbox" id="hourly-reminder"><span class="slider round"></span></label>
                 </div>
                 <div class="setting-item">
-                    <label for="daily-summary">Time Briefing</label>
+                    <label for="daily-summary">Time briefing</label>
                     <label class="switch"><input type="checkbox" id="daily-summary"><span class="slider round"></span></label>
                 </div>
                 <div class="setting-item sub-item hidden" id="daily-summary-time-container">
@@ -215,7 +215,6 @@
                         <button value="system">System</button>
                     </div>
                 </div>
-
                 <div class="setting-item">
                     <label>Accent Color</label>
                     <div class="color-swatch-container" id="accent-color-selector">
@@ -235,17 +234,6 @@
                     </div>
                 </div>
             </div>
-
-            <div id="calendar-choice-modal" class="modal-overlay hidden">
-    <div class="modal-content">
-        <h2>Choose Your Calendar</h2>
-        <p>Please select your preferred calendar system. This will be your default for the app.</p>
-        <div class="modal-actions" style="justify-content: center; margin-top: 25px;">
-            <button id="choose-ethiopian-btn" class="choice-btn">Ethiopian</button>
-            <button id="choose-gregorian-btn" class="choice-btn">Gregorian</button>
-        </div>
-    </div>
-</div>
 
             <div class="settings-section">
                 <h3>Data & Sync</h3>
@@ -306,6 +294,18 @@
                 <div class="chart-container">
                     <canvas id="productivity-chart"></canvas>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- First Time Calendar Choice Modal -->
+    <div id="calendar-choice-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2>Choose Your Calendar</h2>
+            <p>Please select your preferred calendar system. This will be your default for the app.</p>
+            <div class="modal-actions" style="justify-content: center; margin-top: 25px;">
+                <button id="choose-ethiopian-btn" class="choice-btn">Ethiopian</button>
+                <button id="choose-gregorian-btn" class="choice-btn">Gregorian</button>
             </div>
         </div>
     </div>
