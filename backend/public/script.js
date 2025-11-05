@@ -75,7 +75,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const completionRateEl = getEl('completion-rate');
     const productivityChartCanvas = getEl('productivity-chart');
     const themeToggle = getEl('theme-toggle');
-    const calendarTypeSelector = getEl('calendar-type-selector'); // New element reference
+    const calendarChoiceModal = getEl('calendar-choice-modal');
+    const chooseEthiopianBtn = getEl('choose-ethiopian-btn');
+    const chooseGregorianBtn = getEl('choose-gregorian-btn');
+
 
     // --- State Management ---
     let tasks = {};
@@ -132,18 +135,33 @@ document.addEventListener('DOMContentLoaded', () => {
         currentUser = username;
         localStorage.setItem('nextlyUser', currentUser);
 
-        if (body) body.classList.add('logged-in');
+        body.classList.add('logged-in');
         if (currentUserDisplay) currentUserDisplay.textContent = currentUser;
         if (loginView) loginView.classList.add('hidden');
         if (profileView) profileView.classList.remove('hidden');
+        closeMenu();
 
         if (typeof Android !== "undefined" && Android.registerFCMToken) {
             Android.registerFCMToken(currentUser);
         }
 
+        // Load settings from server first to check if user is new
+        await loadSettings();
+
+        // If user hasn't chosen a calendar, show the choice modal and STOP.
+        if (settings.hasChosenCalendar === false) {
+            if(calendarChoiceModal) calendarChoiceModal.classList.remove('hidden');
+        } else {
+            // If they have chosen, proceed with loading the app.
+            await loadAllUserData();
+            await saveSettingsToServer(); // Save latest timezone etc.
+        }
+    };
+
+    // --- NEW function to handle the rest of the app loading ---
+    const completeLoginFlow = async () => {
+        if(calendarChoiceModal) calendarChoiceModal.classList.add('hidden');
         await loadAllUserData();
-        await saveSettingsToServer(); // Crucial to send timezone on first login
-        closeMenu();
     };
 
     const logout = () => {
@@ -438,37 +456,56 @@ document.addEventListener('DOMContentLoaded', () => {
             taskList.appendChild(taskElement);
         });
     };
+    
     const renderSearchResults = (results, query) => {
-        if (!taskList || !emptyState) return;
-        taskList.innerHTML = '';
-        const emptyStateP = emptyState.querySelector('p');
-        const emptyStateSpan = emptyState.querySelector('span');
-        if (results.length === 0) {
-            emptyState.classList.remove('hidden');
-            if (emptyStateP) emptyStateP.textContent = 'No results found';
-            if (emptyStateSpan) emptyStateSpan.textContent = `No tasks match your search for "${query}".`;
-        } else {
-            emptyState.classList.add('hidden');
-            results.forEach(task => {
-                const taskElement = document.createElement('div');
-                taskElement.className = 'task-item search-result';
-                if (task.completed) taskElement.classList.add('completed');
-                taskElement.setAttribute('data-id', task.id);
-                taskElement.setAttribute('data-priority', task.priority);
-                const taskDate = new Date(task.date + 'T00:00:00');
-                const dateString = taskDate.toLocaleDateString('default', { month: 'short', day: 'numeric', year: 'numeric' });
-                taskElement.innerHTML = `<div class="task-content"><h3>${task.title}</h3><p>${task.description}</p></div><div class="task-date-display">${dateString}</div>`;
-                taskElement.addEventListener('click', () => {
-                    currentDate = new Date(task.date + 'T00:00:00');
-                    updateUIForNewDate();
-                    const taskToOpen = tasks[task.date]?.find(t => t.id === task.id);
-                    if (taskToOpen) openTaskModal(taskToOpen);
-                    closeMenu();
-                });
-                taskList.appendChild(taskElement);
+    if (!taskList || !emptyState) return;
+    taskList.innerHTML = '';
+    const emptyStateP = emptyState.querySelector('p');
+    const emptyStateSpan = emptyState.querySelector('span');
+
+    if (results.length === 0) {
+        emptyState.classList.remove('hidden');
+        if (emptyStateP) emptyStateP.textContent = 'No results found';
+        if (emptyStateSpan) emptyStateSpan.textContent = `No tasks match your search for "${query}".`;
+    } else {
+        emptyState.classList.add('hidden');
+        results.forEach(task => {
+            const taskElement = document.createElement('div');
+            taskElement.className = 'task-item search-result';
+            if (task.completed) taskElement.classList.add('completed');
+            taskElement.setAttribute('data-id', task.id);
+            taskElement.setAttribute('data-priority', task.priority);
+
+            // --- DATE BUG FIX is here ---
+            // Create the date object safely to avoid timezone shifts.
+            const taskDate = new Date(task.date + 'T12:00:00');
+            
+            const dateString = taskDate.toLocaleDateString('default', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
             });
-        }
-    };
+
+            taskElement.innerHTML = `<div class="task-content"><h3>${task.title}</h3><p>${task.description}</p></div><div class="task-date-display">${dateString}</div>`;
+            
+            taskElement.addEventListener('click', () => {
+                // --- and also here ---
+                // Set the main app date safely when a search result is clicked.
+                currentDate = new Date(task.date + 'T12:00:00');
+                
+                updateUIForNewDate();
+                
+                // Find the task in the main `tasks` object to ensure we open the correct one
+                const taskToOpen = tasks[task.date]?.find(t => t.id === task.id);
+                if (taskToOpen) {
+                    openTaskModal(taskToOpen);
+                }
+                closeMenu();
+            });
+            taskList.appendChild(taskElement);
+        });
+    }
+};
 
     // --- Modal Management ---
     const openMenu = () => { if (body) body.classList.add('side-menu-active'); };
@@ -772,6 +809,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         console.log("Initialization Complete.");
     };
+
+        if (chooseEthiopianBtn) {
+        chooseEthiopianBtn.addEventListener('click', async () => {
+            settings.calendarType = 'ethiopian';
+            settings.hasChosenCalendar = true;
+            await saveSettingsToServer();
+            await completeLoginFlow();
+        });
+    }
+    if (chooseGregorianBtn) {
+        chooseGregorianBtn.addEventListener('click', async () => {
+            settings.calendarType = 'gregorian';
+            settings.hasChosenCalendar = true;
+            await saveSettingsToServer();
+            await completeLoginFlow();
+        });
+    }
+    
+    // ADD THE DATE BUG FIX TO THE CALENDAR CLICK HANDLER
+    if (calendarDaysGrid) calendarDaysGrid.addEventListener('click', (e) => { 
+        const target = e.target.closest('.calendar-day'); 
+        if (target && target.dataset.date) { 
+            currentDate = new Date(target.dataset.date + 'T12:00:00'); // THE FIX
+            updateUIForNewDate(); 
+        } 
+    });
 
     initializeApp();
 });

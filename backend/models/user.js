@@ -20,7 +20,11 @@ const userSchema = new mongoose.Schema({
         dailySummaryTime: { type: String, default: '08:00' },
         timezone: { type: String, default: 'UTC' },
         lastAdvancedReminderDate: { type: String, default: null },
-        calendarType: { type: String, default: 'gregorian' } // 'gregorian' or 'ethiopian'
+        
+        // --- MODIFIED ---
+        calendarType: { type: String, default: 'gregorian' },
+        // --- ADDED ---
+        hasChosenCalendar: { type: Boolean, default: false } 
     }
 });
 

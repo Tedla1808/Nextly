@@ -215,14 +215,6 @@
                         <button value="system">System</button>
                     </div>
                 </div>
-                
-                <div class="setting-item">
-                    <label for="calendar-type-selector">Calendar System</label>
-                    <select id="calendar-type-selector">
-                        <option value="gregorian">Gregorian Calendar</option>
-                        <option value="ethiopian">Ethiopian Calendar</option>
-                    </select>
-                </div>
 
                 <div class="setting-item">
                     <label>Accent Color</label>
@@ -243,6 +235,17 @@
                     </div>
                 </div>
             </div>
+
+            <div id="calendar-choice-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+        <h2>Choose Your Calendar</h2>
+        <p>Please select your preferred calendar system. This will be your default for the app.</p>
+        <div class="modal-actions" style="justify-content: center; margin-top: 25px;">
+            <button id="choose-ethiopian-btn" class="choice-btn">Ethiopian</button>
+            <button id="choose-gregorian-btn" class="choice-btn">Gregorian</button>
+        </div>
+    </div>
+</div>
 
             <div class="settings-section">
                 <h3>Data & Sync</h3>

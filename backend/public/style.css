@@ -329,4 +329,20 @@ footer {
     .segmented-control, .color-swatch-container {
         width: 100%;
     }
+
+    .choice-btn {
+    padding: 12px 24px;
+    font-size: var(--base-font-size);
+    font-weight: bold;
+    border: 1px solid var(--primary-color);
+    background-color: transparent;
+    color: var(--primary-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+.choice-btn:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
 }
