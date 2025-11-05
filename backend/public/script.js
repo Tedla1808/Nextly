@@ -7,6 +7,16 @@ document.addEventListener('DOMContentLoaded', () => {
     let tasks = {}, currentDate = new Date(), currentTaskId = null, taskIdToDelete = null, taskIdToComplete = null, originalTaskDate = null, productivityChart = null, currentUser = null, isLoginMode = true, settings = {};
     const defaultSettings = { notificationsEnabled: true, dailySummaryEnabled: false, dailySummaryTime: "08:00", hourlyReminderEnabled: false, theme: "system", accentColor: "blue", fontSize: "medium", calendarType: 'gregorian', hasChosenCalendar: false, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone };
 
+    // --- THIS IS THE CRITICAL FIX ---
+    const formatDate = (date) => {
+        const d = new Date(date);
+        const year = d.getFullYear();
+        const month = ('0' + (d.getMonth() + 1)).slice(-2);
+        const day = ('0' + d.getDate()).slice(-2);
+        return `${year}-${month}-${day}`;
+    };
+    // ---------------------------------
+
     const handleAuth = async () => { if (!usernameInput || !passwordInput) return; const username = usernameInput.value.trim().toLowerCase(); const password = passwordInput.value; if (!username || !password) return alert('Please enter both a username and password.'); const endpoint = isLoginMode ? '/api/auth/login' : '/api/auth/register'; try { const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) }); const data = await response.json(); if (!response.ok) throw new Error(data.message || 'An error occurred.'); if (isLoginMode) { await login(data.username); } else { alert(data.message); toggleAuthMode(); } } catch (error) { alert(error.message); } };
     const login = async (username) => { if (!username) return; currentUser = username; localStorage.setItem('nextlyUser', currentUser); body.classList.add('logged-in'); if (currentUserDisplay) currentUserDisplay.textContent = currentUser; if (loginView) loginView.classList.add('hidden'); if (profileView) profileView.classList.remove('hidden'); closeMenu(); if (typeof Android !== "undefined" && Android.registerFCMToken) { Android.registerFCMToken(currentUser); } await loadSettings(); if (settings.hasChosenCalendar === false) { if (calendarChoiceModal) calendarChoiceModal.classList.remove('hidden'); } else { await completeLoginFlow(); } };
     const completeLoginFlow = async () => { if (calendarChoiceModal) calendarChoiceModal.classList.add('hidden'); await saveSettingsToServer(); await loadAllUserData(); };
@@ -14,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadAllUserData = async () => { await loadSettings(); loadMotto(); await loadTasksForCurrentUser(); updateUIForNewDate(); };
     const loadTasksForCurrentUser = async () => { if (!currentUser) { tasks = {}; return; } try { const response = await fetch(`/api/tasks/${currentUser}`); const serverTasks = await response.json(); tasks = {}; serverTasks.forEach(task => { const taskDate = task.date; if (!tasks[taskDate]) tasks[taskDate] = []; tasks[taskDate].push({ ...task, id: task._id }); }); } catch (error) { console.error('Failed to load tasks:', error); tasks = {}; } };
     const toggleAuthMode = () => { isLoginMode = !isLoginMode; if (authTitle) authTitle.textContent = isLoginMode ? 'Login' : 'Sign Up'; if (authBtn) authBtn.textContent = isLoginMode ? 'Login' : 'Sign Up'; if (authToggleLink) authToggleLink.textContent = isLoginMode ? "Don't have an account? Sign Up" : "Already have an account? Login"; if (passwordInput) passwordInput.value = ''; if (usernameInput) usernameInput.value = ''; };
-    const formatDate = (d) => d.toISOString().split('T')[0];
     const saveMotto = () => { if (currentUser && mottoInput) localStorage.setItem(`userMotto_${currentUser}`, mottoInput.value); };
     const loadMotto = () => { if (mottoInput) mottoInput.value = currentUser ? localStorage.getItem(`userMotto_${currentUser}`) || "Your daily focus motto" : "Your daily focus motto"; };
     const saveSettingsToServer = async () => { if (!currentUser) return; const settingsPayload = { ...settings, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone }; try { await fetch(`/api/user/${currentUser}/settings`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(settingsPayload) }); console.log("Settings saved to server."); } catch (error) { console.error("Failed to save settings to server:", error); } };
