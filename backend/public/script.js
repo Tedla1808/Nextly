@@ -7,19 +7,21 @@ document.addEventListener('DOMContentLoaded', () => {
     let tasks = {}, currentDate = new Date(), currentTaskId = null, taskIdToDelete = null, taskIdToComplete = null, originalTaskDate = null, productivityChart = null, currentUser = null, isLoginMode = true, settings = {};
     const defaultSettings = { notificationsEnabled: true, dailySummaryEnabled: false, dailySummaryTime: "08:00", hourlyReminderEnabled: false, theme: "system", accentColor: "blue", fontSize: "medium", calendarType: 'gregorian', hasChosenCalendar: false, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone };
 
+    const formatDate = (date) => { const d = new Date(date); const year = d.getFullYear(); const month = ('0' + (d.getMonth() + 1)).slice(-2); const day = ('0' + d.getDate()).slice(-2); return `${year}-${month}-${day}`; };
+    
+    const handleAuth = async () => { if (!usernameInput || !passwordInput) return; const username = usernameInput.value.trim().toLowerCase(); const password = passwordInput.value; if (!username || !password) return alert('Please enter both a username and password.'); const endpoint = isLoginMode ? '/api/auth/login' : '/api/auth/register'; try { const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) }); const data = await response.json(); if (!response.ok) throw new Error(data.message || 'An error occurred.'); if (isLoginMode) { await login(data.username); } else { alert(data.message); toggleAuthMode(); } } catch (error) { alert(error.message); } };
+    const login = async (username) => { if (!username) return; currentUser = username; localStorage.setItem('nextlyUser', currentUser); body.classList.add('logged-in'); if (currentUserDisplay) currentUserDisplay.textContent = currentUser; if (loginView) loginView.classList.add('hidden'); if (profileView) profileView.classList.remove('hidden'); closeMenu(); if (typeof Android !== "undefined" && Android.registerFCMToken) { Android.registerFCMToken(currentUser); } await loadSettings(); if (!settings.hasChosenCalendar) { if (calendarChoiceModal) calendarChoiceModal.classList.remove('hidden'); } else { await completeLoginFlow(true); } };
+    
     // --- THIS IS THE CRITICAL FIX ---
-    const formatDate = (date) => {
-        const d = new Date(date);
-        const year = d.getFullYear();
-        const month = ('0' + (d.getMonth() + 1)).slice(-2);
-        const day = ('0' + d.getDate()).slice(-2);
-        return `${year}-${month}-${day}`;
+    const completeLoginFlow = async (isReturningUser = false) => {
+        if (calendarChoiceModal) calendarChoiceModal.classList.add('hidden');
+        if (isReturningUser) await saveSettingsToServer(); // Only save settings if it's not the first choice
+        loadMotto();
+        await loadTasksForCurrentUser();
+        updateUIForNewDate();
     };
     // ---------------------------------
 
-    const handleAuth = async () => { if (!usernameInput || !passwordInput) return; const username = usernameInput.value.trim().toLowerCase(); const password = passwordInput.value; if (!username || !password) return alert('Please enter both a username and password.'); const endpoint = isLoginMode ? '/api/auth/login' : '/api/auth/register'; try { const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) }); const data = await response.json(); if (!response.ok) throw new Error(data.message || 'An error occurred.'); if (isLoginMode) { await login(data.username); } else { alert(data.message); toggleAuthMode(); } } catch (error) { alert(error.message); } };
-    const login = async (username) => { if (!username) return; currentUser = username; localStorage.setItem('nextlyUser', currentUser); body.classList.add('logged-in'); if (currentUserDisplay) currentUserDisplay.textContent = currentUser; if (loginView) loginView.classList.add('hidden'); if (profileView) profileView.classList.remove('hidden'); closeMenu(); if (typeof Android !== "undefined" && Android.registerFCMToken) { Android.registerFCMToken(currentUser); } await loadSettings(); if (settings.hasChosenCalendar === false) { if (calendarChoiceModal) calendarChoiceModal.classList.remove('hidden'); } else { await completeLoginFlow(); } };
-    const completeLoginFlow = async () => { if (calendarChoiceModal) calendarChoiceModal.classList.add('hidden'); await saveSettingsToServer(); await loadAllUserData(); };
     const logout = () => { currentUser = null; localStorage.clear(); tasks = {}; body.classList.remove('logged-in'); if (currentUserDisplay) currentUserDisplay.textContent = ''; if (loginView) loginView.classList.remove('hidden'); if (profileView) profileView.classList.add('hidden'); if (!isLoginMode) toggleAuthMode(); loadAllUserData(); };
     const loadAllUserData = async () => { await loadSettings(); loadMotto(); await loadTasksForCurrentUser(); updateUIForNewDate(); };
     const loadTasksForCurrentUser = async () => { if (!currentUser) { tasks = {}; return; } try { const response = await fetch(`/api/tasks/${currentUser}`); const serverTasks = await response.json(); tasks = {}; serverTasks.forEach(task => { const taskDate = task.date; if (!tasks[taskDate]) tasks[taskDate] = []; tasks[taskDate].push({ ...task, id: task._id }); }); } catch (error) { console.error('Failed to load tasks:', error); tasks = {}; } };
