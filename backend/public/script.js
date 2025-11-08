@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const continueInitialization = async () => {
         const savedUser = localStorage.getItem('nextlyUser');
-        if (savedUser) { await login(savedUser); } else { body.classList.remove('logged-in'); await loadAllUserData(); }
+        if (savedUser) { await login(savedUser); } else { if (body) body.classList.remove('logged-in'); await loadAllUserData(); }
     };
 
     const handleCalendarChoice = (choice) => {
