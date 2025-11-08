@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const chooseGregorianBtn = getEl('choose-gregorian-btn');
     const menuBtn = getEl('menu-btn'), closeMenuBtn = getEl('close-menu-btn'), mottoInput = getEl('motto-input'), taskList = getEl('task-list'), emptyState = getEl('empty-state'), addTaskBtn = getEl('add-task-btn'), openSettingsBtn = getEl('open-settings-btn'), openAnalysisBtn = getEl('open-analysis-btn'), searchBar = getEl('search-bar'), loginView = getEl('login-view'), usernameInput = getEl('username-input'), passwordInput = getEl('password-input'), authTitle = getEl('auth-title'), authBtn = getEl('auth-btn'), authToggleLink = getEl('auth-toggle-link'), profileView = getEl('profile-view'), currentUserDisplay = getEl('current-user-display'), logoutBtn = getEl('logout-btn'), body = document.body, monthYearHeader = getEl('month-year-header'), calendarDaysGrid = getEl('calendar-days-grid'), prevMonthBtn = getEl('prev-month-btn'), nextMonthBtn = getEl('next-month-btn'), todayBtn = getEl('today-btn'), jumpToDateBtn = getEl('jump-to-date-btn'), toggleCalendarBtn = getEl('toggle-calendar-btn'), calendarBody = getEl('calendar-body'), selectedDateDisplay = getEl('selected-date-display'), datePicker = getEl('date-picker'), taskModal = getEl('task-modal'), modalTitle = getEl('modal-title'), taskForm = getEl('task-form'), cancelBtn = getEl('cancel-btn'), editTaskDateContainer = getEl('edit-task-date-container'), editTaskDateInput = getEl('edit-task-date'), deleteConfirmModal = getEl('delete-confirm-modal'), cancelDeleteBtn = getEl('cancel-delete-btn'), confirmDeleteBtn = getEl('confirm-delete-btn'), completeConfirmModal = getEl('complete-confirm-modal'), cancelCompleteBtn = getEl('cancel-complete-btn'), confirmCompleteBtn = getEl('confirm-complete-btn'), jumpToDateModal = getEl('jump-to-date-modal'), jumpMonthSelect = getEl('jump-month'), jumpDaySelect = getEl('jump-day'), jumpYearInput = getEl('jump-year'), cancelJumpBtn = getEl('cancel-jump-btn'), goToDateBtn = getEl('go-to-date-btn'), settingsModal = getEl('settings-modal'), closeSettingsBtn = getEl('close-settings-btn'), enableNotificationsToggle = getEl('enable-notifications'), hourlyReminderToggle = getEl('hourly-reminder'), dailySummaryToggle = getEl('daily-summary'), dailySummaryTimeContainer = getEl('daily-summary-time-container'), dailySummaryTimeInput = getEl('daily-summary-time'), themeSelector = getEl('theme-selector'), accentColorSelector = getEl('accent-color-selector'), fontSizeSelector = getEl('font-size-selector'), deleteAllDataBtn = getEl('delete-all-data-btn'), deleteDataConfirmModal = getEl('delete-data-confirm-modal'), cancelDeleteDataBtn = getEl('cancel-delete-data-btn'), confirmDeleteDataBtn = getEl('confirm-delete-data-btn'), deleteConfirmInput = getEl('delete-confirm-input'), analysisModal = getEl('analysis-modal'), closeAnalysisBtn = getEl('close-analysis-btn'), completedCountEl = getEl('completed-count'), overdueCountEl = getEl('overdue-count'), totalCountEl = getEl('total-count'), completionRateEl = getEl('completion-rate'), productivityChartCanvas = getEl('productivity-chart'), themeToggle = getEl('theme-toggle');
 
-    // --- Amharic Translations ---
     const amharicMonthNames = ["መስከረም", "ጥቅምት", "ኅዳር", "ታኅሣሥ", "ጥር", "የካቲት", "መጋቢት", "ሚያዝያ", "ግንቦት", "ሰኔ", "ሐምሌ", "ነሐሴ", "ጳጉሜ"];
     const amharicWeekDayNames = ["እሑድ", "ሰኞ", "ማክሰኞ", "ረቡዕ", "ሐሙስ", "ዓርብ", "ቅዳሜ"];
     const gregorianWeekDayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -32,12 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const continueInitialization = async () => {
         const savedUser = localStorage.getItem('nextlyUser');
-        if (savedUser) {
-            await login(savedUser);
-        } else {
-            body.classList.remove('logged-in');
-            await loadAllUserData();
-        }
+        if (savedUser) { await login(savedUser); } else { body.classList.remove('logged-in'); await loadAllUserData(); }
     };
 
     const handleCalendarChoice = (choice) => {
@@ -56,79 +50,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleAuthMode = () => { isLoginMode = !isLoginMode; if (authTitle) authTitle.textContent = isLoginMode ? 'Login' : 'Sign Up'; if (authBtn) authBtn.textContent = isLoginMode ? 'Login' : 'Sign Up'; if (authToggleLink) authToggleLink.textContent = isLoginMode ? "Don't have an account? Sign Up" : "Already have an account? Login"; if (passwordInput) passwordInput.value = ''; if (usernameInput) usernameInput.value = ''; };
     const saveMotto = () => { if (currentUser && mottoInput) localStorage.setItem(`userMotto_${currentUser}`, mottoInput.value); };
     const loadMotto = () => { if (mottoInput) mottoInput.value = currentUser ? localStorage.getItem(`userMotto_${currentUser}`) || "Your daily focus motto" : "Your daily focus motto"; };
-    const saveSettingsToServer = async () => { if (!currentUser) return; const settingsPayload = { ...settings, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone }; try { await fetch(`/api/user/${currentUser}/settings`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(settingsPayload) }); console.log("Settings saved to server."); } catch (error) { console.error("Failed to save settings to server:", error); } };
+    const saveSettingsToServer = async () => { if (!currentUser) return; const settingsPayload = { ...settings }; try { await fetch(`/api/user/${currentUser}/settings`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(settingsPayload) }); console.log("Settings saved to server."); } catch (error) { console.error("Failed to save settings to server:", error); } };
     const loadSettings = async () => { if (currentUser) { try { const response = await fetch(`/api/user/${currentUser}/settings`); if (!response.ok) throw new Error('Server responded with an error'); const serverSettings = await response.json(); settings = { ...defaultSettings, ...serverSettings }; } catch (error) { console.warn("Could not fetch settings from server, using local fallback.", error); const localSettings = JSON.parse(localStorage.getItem(`nextlySettings_${currentUser}`)); settings = { ...defaultSettings, ...localSettings }; } } else { settings = { ...defaultSettings }; } if (currentUser) localStorage.setItem(`nextlySettings_${currentUser}`, JSON.stringify(settings)); updateSettingsUI(); };
     const updateSettingsUI = () => { if (!settings) return; if (enableNotificationsToggle) enableNotificationsToggle.checked = settings.notificationsEnabled; if (dailySummaryToggle) dailySummaryToggle.checked = settings.dailySummaryEnabled; if (dailySummaryTimeInput) dailySummaryTimeInput.value = settings.dailySummaryTime; if (dailySummaryTimeContainer) dailySummaryTimeContainer.classList.toggle('hidden', !settings.dailySummaryEnabled); if (hourlyReminderToggle) hourlyReminderToggle.checked = settings.hourlyReminderEnabled; if (themeSelector) { const activeBtn = themeSelector.querySelector('.active'); if (activeBtn) activeBtn.classList.remove('active'); const newActiveBtn = themeSelector.querySelector(`button[value="${settings.theme}"]`); if (newActiveBtn) newActiveBtn.classList.add('active'); } if (accentColorSelector) { const activeSwatch = accentColorSelector.querySelector('.active'); if (activeSwatch) activeSwatch.classList.remove('active'); const newActiveSwatch = accentColorSelector.querySelector(`.color-swatch[data-color="${settings.accentColor}"]`); if (newActiveSwatch) newActiveSwatch.classList.add('active'); } if (fontSizeSelector) { const activeBtn = fontSizeSelector.querySelector('.active'); if (activeBtn) activeBtn.classList.remove('active'); const newActiveBtn = fontSizeSelector.querySelector(`button[value="${settings.fontSize}"]`); if (newActiveBtn) newActiveBtn.classList.add('active'); } applyTheme(settings.theme); applyAccentColor(settings.accentColor); applyFontSize(settings.fontSize); };
     const applyTheme = (theme) => { body.dataset.theme = theme; if (theme === 'system') { const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; body.classList.toggle('dark-theme', prefersDark); if (themeToggle) themeToggle.checked = prefersDark; } else { body.classList.toggle('dark-theme', theme === 'dark'); if (themeToggle) themeToggle.checked = theme === 'dark'; } };
     const applyAccentColor = (color) => body.dataset.accentColor = color;
     const applyFontSize = (size) => body.dataset.fontSize = size;
-
-    const generateCalendar = (date) => {
-        if (!calendarDaysGrid || !monthYearHeader) return;
-        const weekdaysContainer = document.querySelector('.calendar-weekdays');
-        if (!weekdaysContainer) return;
-
-        calendarDaysGrid.innerHTML = '';
-        weekdaysContainer.innerHTML = '';
-        const today = new Date(); today.setHours(0, 0, 0, 0);
-
-        let startingDayOfWeek, daysInMonth, totalCells;
-        const TOTAL_GRID_CELLS = 42; // 6 rows * 7 columns
-
-        if (calendarType === 'gregorian') {
-            gregorianWeekDayNames.forEach(day => weekdaysContainer.insertAdjacentHTML('beforeend', `<div>${day}</div>`));
-            const month = date.getMonth(), year = date.getFullYear();
-            monthYearHeader.textContent = `${date.toLocaleString('default', { month: 'long' })} ${year}`;
-            const firstDayOfMonth = new Date(year, month, 1);
-            daysInMonth = new Date(year, month + 1, 0).getDate();
-            startingDayOfWeek = firstDayOfMonth.getDay();
-            totalCells = startingDayOfWeek + daysInMonth;
-
-            for (let i = 0; i < startingDayOfWeek; i++) calendarDaysGrid.insertAdjacentHTML('beforeend', `<div class="calendar-day not-current-month"></div>`);
-            for (let i = 1; i <= daysInMonth; i++) {
-                const dayCell = document.createElement('div');
-                dayCell.className = 'calendar-day';
-                dayCell.textContent = i;
-                const cellDate = new Date(year, month, i);
-                const formattedCellDate = formatDate(cellDate);
-                dayCell.dataset.date = formattedCellDate;
-                if (today.getTime() === cellDate.getTime()) dayCell.classList.add('current-day');
-                if (tasks[formattedCellDate]?.some(t => !t.completed)) dayCell.classList.add('day-with-task');
-                if (formatDate(currentDate) === formattedCellDate) dayCell.classList.add('selected-day');
-                calendarDaysGrid.appendChild(dayCell);
-            }
-        } else {
-            amharicWeekDayNames.forEach(day => weekdaysContainer.insertAdjacentHTML('beforeend', `<div>${day}</div>`));
-            const [ethYear, ethMonth] = EthiopianDate.toEthiopian(date.getFullYear(), date.getMonth() + 1, date.getDate());
-            monthYearHeader.textContent = `${amharicMonthNames[ethMonth - 1]} ${ethYear}`;
-            const firstDayOfEthMonthInGregorian = EthiopianDate.toGregorian(ethYear, ethMonth, 1);
-            const firstDay = new Date(firstDayOfEthMonthInGregorian.year, firstDayOfEthMonthInGregorian.month - 1, firstDayOfEthMonthInGregorian.day);
-            startingDayOfWeek = firstDay.getDay();
-            daysInMonth = (ethMonth === 13) ? (EthiopianDate.isLeap(ethYear) ? 6 : 5) : 30;
-            totalCells = startingDayOfWeek + daysInMonth;
-
-            for (let i = 0; i < startingDayOfWeek; i++) calendarDaysGrid.insertAdjacentHTML('beforeend', `<div class="calendar-day not-current-month"></div>`);
-            for (let i = 1; i <= daysInMonth; i++) {
-                const dayCell = document.createElement('div');
-                dayCell.className = 'calendar-day';
-                dayCell.textContent = i;
-                const dayGregorian = EthiopianDate.toGregorian(ethYear, ethMonth, i);
-                const cellDate = new Date(dayGregorian.year, dayGregorian.month - 1, dayGregorian.day);
-                const formattedCellDate = formatDate(cellDate);
-                dayCell.dataset.date = formattedCellDate;
-                const [todayEthYear, todayEthMonth, todayEthDay] = EthiopianDate.toEthiopian(today.getFullYear(), today.getMonth() + 1, today.getDate());
-                if (todayEthYear === ethYear && todayEthMonth === ethMonth && todayEthDay === i) dayCell.classList.add('current-day');
-                if (tasks[formattedCellDate]?.some(t => !t.completed)) dayCell.classList.add('day-with-task');
-                const [currentEthYear, currentEthMonth, currentEthDay] = EthiopianDate.toEthiopian(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate());
-                if (currentEthYear === ethYear && currentEthMonth === ethMonth && currentEthDay === i) dayCell.classList.add('selected-day');
-                calendarDaysGrid.appendChild(dayCell);
-            }
-        }
-        for (let i = totalCells; i < TOTAL_GRID_CELLS; i++) {
-            calendarDaysGrid.insertAdjacentHTML('beforeend', `<div class="calendar-day not-current-month"></div>`);
-        }
-    };
-
+    const generateCalendar = (date) => { if (!calendarDaysGrid || !monthYearHeader) return; const weekdaysContainer = document.querySelector('.calendar-weekdays'); if (!weekdaysContainer) return; calendarDaysGrid.innerHTML = ''; weekdaysContainer.innerHTML = ''; const today = new Date(); today.setHours(0, 0, 0, 0); let startingDayOfWeek, daysInMonth, totalCells; const TOTAL_GRID_CELLS = 42; if (calendarType === 'gregorian') { gregorianWeekDayNames.forEach(day => weekdaysContainer.insertAdjacentHTML('beforeend', `<div>${day}</div>`)); const month = date.getMonth(), year = date.getFullYear(); monthYearHeader.textContent = `${date.toLocaleString('default', { month: 'long' })} ${year}`; const firstDayOfMonth = new Date(year, month, 1); daysInMonth = new Date(year, month + 1, 0).getDate(); startingDayOfWeek = firstDayOfMonth.getDay(); totalCells = startingDayOfWeek + daysInMonth; for (let i = 0; i < startingDayOfWeek; i++) calendarDaysGrid.insertAdjacentHTML('beforeend', `<div class="calendar-day not-current-month"></div>`); for (let i = 1; i <= daysInMonth; i++) { const dayCell = document.createElement('div'); dayCell.className = 'calendar-day'; dayCell.textContent = i; const cellDate = new Date(year, month, i); const formattedCellDate = formatDate(cellDate); dayCell.dataset.date = formattedCellDate; if (today.getTime() === cellDate.getTime()) dayCell.classList.add('current-day'); if (tasks[formattedCellDate]?.some(t => !t.completed)) dayCell.classList.add('day-with-task'); if (formatDate(currentDate) === formattedCellDate) dayCell.classList.add('selected-day'); calendarDaysGrid.appendChild(dayCell); } } else { amharicWeekDayNames.forEach(day => weekdaysContainer.insertAdjacentHTML('beforeend', `<div>${day}</div>`)); const [ethYear, ethMonth] = EthiopianDate.toEthiopian(date.getFullYear(), date.getMonth() + 1, date.getDate()); monthYearHeader.textContent = `${amharicMonthNames[ethMonth - 1]} ${ethYear}`; const firstDayOfEthMonthInGregorian = EthiopianDate.toGregorian(ethYear, ethMonth, 1); const firstDay = new Date(firstDayOfEthMonthInGregorian.year, firstDayOfEthMonthInGregorian.month - 1, firstDayOfEthMonthInGregorian.day); startingDayOfWeek = firstDay.getDay(); daysInMonth = (ethMonth === 13) ? (EthiopianDate.isLeap(ethYear) ? 6 : 5) : 30; totalCells = startingDayOfWeek + daysInMonth; for (let i = 0; i < startingDayOfWeek; i++) calendarDaysGrid.insertAdjacentHTML('beforeend', `<div class="calendar-day not-current-month"></div>`); for (let i = 1; i <= daysInMonth; i++) { const dayCell = document.createElement('div'); dayCell.className = 'calendar-day'; dayCell.textContent = i; const dayGregorian = EthiopianDate.toGregorian(ethYear, ethMonth, i); const cellDate = new Date(dayGregorian.year, dayGregorian.month - 1, dayGregorian.day); const formattedCellDate = formatDate(cellDate); dayCell.dataset.date = formattedCellDate; const [todayEthYear, todayEthMonth, todayEthDay] = EthiopianDate.toEthiopian(today.getFullYear(), today.getMonth() + 1, today.getDate()); if (todayEthYear === ethYear && todayEthMonth === ethMonth && todayEthDay === i) dayCell.classList.add('current-day'); if (tasks[formattedCellDate]?.some(t => !t.completed)) dayCell.classList.add('day-with-task'); const [currentEthYear, currentEthMonth, currentEthDay] = EthiopianDate.toEthiopian(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate()); if (currentEthYear === ethYear && currentEthMonth === ethMonth && currentEthDay === i) dayCell.classList.add('selected-day'); calendarDaysGrid.appendChild(dayCell); } } for (let i = totalCells; i < TOTAL_GRID_CELLS; i++) { calendarDaysGrid.insertAdjacentHTML('beforeend', `<div class="calendar-day not-current-month"></div>`); } };
     const updateUIForNewDate = () => { currentDate.setHours(12, 0, 0, 0); if (datePicker) datePicker.value = formatDate(currentDate); if (selectedDateDisplay) { if (calendarType === 'gregorian') { selectedDateDisplay.textContent = currentDate.toLocaleDateString('default', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }); } else { const [ethYear, ethMonth, ethDay] = EthiopianDate.toEthiopian(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate()); const ethWeekdayName = amharicWeekDayNames[currentDate.getDay()]; selectedDateDisplay.textContent = `${ethWeekdayName}, ${amharicMonthNames[ethMonth - 1]} ${ethDay}, ${ethYear}`; } } if (searchBar) searchBar.value = ''; if (selectedDateDisplay) selectedDateDisplay.classList.remove('hidden'); const calContainer = document.querySelector('.calendar-container'); if (calContainer) calContainer.classList.remove('hidden'); generateCalendar(currentDate); renderTasks(); };
     const renderTasks = () => { if (!taskList || !emptyState || !datePicker) return; const selectedDate = datePicker.value; const tasksForDay = tasks[selectedDate] || []; taskList.innerHTML = ''; const emptyStateP = emptyState.querySelector('p'); const emptyStateSpan = emptyState.querySelector('span'); if (emptyStateP) emptyStateP.textContent = 'All clear! Enjoy your day.'; if (emptyStateSpan) emptyStateSpan.innerHTML = 'Add a new task to get started.'; const uncompletedTasks = tasksForDay.filter(t => !t.completed); const completedTasks = tasksForDay.filter(t => t.completed); emptyState.classList.toggle('hidden', uncompletedTasks.length > 0); [...uncompletedTasks, ...completedTasks].forEach(task => { const taskElement = document.createElement('div'); taskElement.className = 'task-item'; if (task.completed) taskElement.classList.add('completed'); taskElement.setAttribute('data-id', task.id); taskElement.setAttribute('data-priority', task.priority); taskElement.setAttribute('draggable', !task.completed); taskElement.innerHTML = `<div class="task-content"><h3>${task.title}</h3><p>${task.description}</p></div>`; const taskContent = taskElement.querySelector('.task-content'); if (taskContent) taskContent.addEventListener('click', () => openTaskModal(task)); if (!task.completed) addSwipeAndDragListeners(taskElement); taskList.appendChild(taskElement); }); };
     const renderSearchResults = (results, query) => { if (!taskList || !emptyState) return; taskList.innerHTML = ''; const emptyStateP = emptyState.querySelector('p'); const emptyStateSpan = emptyState.querySelector('span'); if (results.length === 0) { emptyState.classList.remove('hidden'); if (emptyStateP) emptyStateP.textContent = 'No results found'; if (emptyStateSpan) emptyStateSpan.textContent = `No tasks match your search for "${query}".`; } else { emptyState.classList.add('hidden'); results.forEach(task => { const taskElement = document.createElement('div'); taskElement.className = 'task-item search-result'; if (task.completed) taskElement.classList.add('completed'); taskElement.setAttribute('data-id', task.id); taskElement.setAttribute('data-priority', task.priority); const taskDate = new Date(task.date + 'T12:00:00'); const dateString = taskDate.toLocaleDateString('default', { month: 'short', day: 'numeric', year: 'numeric' }); taskElement.innerHTML = `<div class="task-content"><h3>${task.title}</h3><p>${task.description}</p></div><div class="task-date-display">${dateString}</div>`; taskElement.addEventListener('click', () => { currentDate = new Date(task.date + 'T12:00:00'); updateUIForNewDate(); const taskToOpen = tasks[task.date]?.find(t => t.id === task.id); if (taskToOpen) openTaskModal(taskToOpen); closeMenu(); }); taskList.appendChild(taskElement); }); } };
@@ -164,8 +92,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (addTaskBtn) addTaskBtn.addEventListener('click', () => { if (!currentUser) { alert('Please log in to add tasks.'); return; } openTaskModal(); });
     if (openSettingsBtn) openSettingsBtn.addEventListener('click', openSettingsModal);
     if (openAnalysisBtn) openAnalysisBtn.addEventListener('click', openAnalysisModal);
-    if (prevMonthBtn) prevMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); updateUIForNewDate(); });
-    if (nextMonthBtn) nextMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); updateUIForNewDate(); });
+    if (prevMonthBtn) prevMonthBtn.addEventListener('click', () => { if (calendarType === 'gregorian') { currentDate.setMonth(currentDate.getMonth() - 1); } else { let [year, month, day] = EthiopianDate.toEthiopian(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate()); month--; if (month < 1) { month = 13; year--; } const gregorian = EthiopianDate.toGregorian(year, month, day); currentDate = new Date(gregorian.year, gregorian.month - 1, gregorian.day); } updateUIForNewDate(); });
+    if (nextMonthBtn) nextMonthBtn.addEventListener('click', () => { if (calendarType === 'gregorian') { currentDate.setMonth(currentDate.getMonth() + 1); } else { let [year, month, day] = EthiopianDate.toEthiopian(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate()); month++; if (month > 13) { month = 1; year++; } const gregorian = EthiopianDate.toGregorian(year, month, day); currentDate = new Date(gregorian.year, gregorian.month - 1, gregorian.day); } updateUIForNewDate(); });
     if (todayBtn) todayBtn.addEventListener('click', () => { currentDate = new Date(); updateUIForNewDate(); });
     if (toggleCalendarBtn) toggleCalendarBtn.addEventListener('click', () => { if (calendarBody) calendarBody.classList.toggle('collapsed'); const icon = toggleCalendarBtn.querySelector('i'); if (icon) { icon.classList.toggle('fa-chevron-up'); icon.classList.toggle('fa-chevron-down'); } });
     if (calendarDaysGrid) calendarDaysGrid.addEventListener('click', (e) => { const target = e.target.closest('.calendar-day'); if (target && target.dataset.date) { currentDate = new Date(target.dataset.date + 'T12:00:00'); updateUIForNewDate(); } });
