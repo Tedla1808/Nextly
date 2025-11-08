@@ -7,9 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     
-    <!-- ADD `defer` TO BOTH SCRIPT TAGS INSIDE THE HEAD -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/ethiopian-date/dist/ethiopian-date.min.js" defer></script>
+    <!-- All script tags have been moved to the end of the <body> -->
 
 </head>
 <body data-theme="system" data-accent-color="blue" data-font-size="medium">
@@ -138,7 +136,7 @@
         </div>
     </div>
     
-    <!-- All other modals are the same... -->
+    <!-- Delete Confirmation Modal -->
     <div id="delete-confirm-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <h2>Confirm Deletion</h2>
@@ -149,6 +147,8 @@
             </div>
         </div>
     </div>
+
+    <!-- Complete Confirmation Modal -->
     <div id="complete-confirm-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <h2>Confirm Completion</h2>
@@ -159,6 +159,8 @@
             </div>
         </div>
     </div>
+
+    <!-- Jump to Date Modal -->
     <div id="jump-to-date-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <h2>Jump to Date</h2>
@@ -173,12 +175,15 @@
             </div>
         </div>
     </div>
+    
+    <!-- Settings Modal -->
     <div id="settings-modal" class="modal-overlay hidden">
         <div class="modal-content modal-lg">
             <div class="modal-header">
                 <h2>Settings</h2>
                 <button id="close-settings-btn" class="close-modal-btn">&times;</button>
             </div>
+            
             <div class="settings-section">
                 <h3>Notifications</h3>
                 <div class="setting-item">
@@ -198,6 +203,7 @@
                     <input type="time" id="daily-summary-time">
                 </div>
             </div>
+
             <div class="settings-section">
                 <h3>Personalization & Appearance</h3>
                 <div class="setting-item">
@@ -227,6 +233,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="settings-section">
                 <h3>Data & Sync</h3>
                 <div class="danger-zone">
@@ -236,6 +243,8 @@
             </div>
         </div>
     </div>
+
+    <!-- Delete All Data Confirmation Modal -->
     <div id="delete-data-confirm-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <h2>Confirm Deletion</h2>
@@ -247,12 +256,15 @@
             </div>
         </div>
     </div>
+
+    <!-- Analysis Modal -->
     <div id="analysis-modal" class="modal-overlay hidden">
         <div class="modal-content modal-lg">
             <div class="modal-header">
                 <h2>Productivity Analysis</h2>
                 <button id="close-analysis-btn" class="close-modal-btn">&times;</button>
             </div>
+            
             <div class="settings-section">
                 <h3>Lifetime Stats</h3>
                 <div class="stats-grid">
@@ -274,6 +286,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="settings-section">
                 <h3>Weekly Activity</h3>
                 <p class="chart-subtitle">Tasks completed in the last 7 days</p>
@@ -283,6 +296,8 @@
             </div>
         </div>
     </div>
+
+    <!-- First Time Calendar Choice Modal -->
     <div id="calendar-choice-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <h2>Choose Your Calendar</h2>
@@ -294,7 +309,16 @@
         </div>
     </div>
 
-    <!-- The main script is also deferred to run in the correct order -->
-    <script src="script.js" defer></script>
+    <!-- ========================================================= -->
+    <!-- === SCRIPT TAGS MOVED HERE FOR MAXIMUM RELIABILITY === -->
+    <!-- ========================================================= -->
+    
+    <!-- Libraries are loaded first, in order -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethiopian-date/dist/ethiopian-date.min.js"></script>
+    
+    <!-- Your main application script is loaded LAST -->
+    <script src="script.js"></script>
+    
 </body>
 </html>
