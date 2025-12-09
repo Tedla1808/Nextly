@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema({
         dailySummaryTime: { type: String, default: '08:00' },
         timezone: { type: String, default: 'UTC' },
         lastAdvancedReminderDate: { type: String, default: null }
-        // The calendarType and hasChosenCalendar fields have been removed.
+        // calendarType and hasChosenCalendar have been removed.
     }
 });
 
